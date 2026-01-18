@@ -1,6 +1,8 @@
 pluginManagement {
     repositories {
-        maven("https://repo.smolder.fr/public/")
+        maven {
+            url = "https://repo.smolder.fr/public/"
+        }
         gradlePluginPortal()
     }
 }

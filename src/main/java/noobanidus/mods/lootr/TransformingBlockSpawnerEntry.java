@@ -1,8 +1,7 @@
-package noobanidus.mods.lootr.plugin;
+package noobanidus.mods.lootr;
 
 import com.hypixel.hytale.builtin.blockspawner.BlockSpawnerEntry;
 import com.hypixel.hytale.component.Holder;
-import com.hypixel.hytale.server.core.universe.world.meta.state.ItemContainerState;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 
 public class TransformingBlockSpawnerEntry extends BlockSpawnerEntry {

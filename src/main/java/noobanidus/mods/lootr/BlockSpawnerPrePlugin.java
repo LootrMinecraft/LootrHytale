@@ -1,4 +1,4 @@
-package noobanidus.mods.lootr.plugin;
+package noobanidus.mods.lootr;
 
 import com.hypixel.hytale.builtin.blockspawner.BlockSpawnerTable;
 import com.hypixel.hytale.builtin.blockspawner.state.BlockSpawner;

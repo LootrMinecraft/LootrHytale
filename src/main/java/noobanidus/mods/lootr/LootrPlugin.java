@@ -1,8 +1,6 @@
-package noobanidus.mods.lootr.plugin;
+package noobanidus.mods.lootr;
 
 import com.hypixel.hytale.builtin.blockspawner.BlockSpawnerEntry;
-import com.hypixel.hytale.builtin.blockspawner.BlockSpawnerPlugin;
-import com.hypixel.hytale.builtin.blockspawner.BlockSpawnerTable;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;

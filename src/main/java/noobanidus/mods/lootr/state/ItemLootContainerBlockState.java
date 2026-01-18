@@ -1,4 +1,4 @@
-package noobanidus.mods.lootr.plugin.state;
+package noobanidus.mods.lootr.state;
 
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 

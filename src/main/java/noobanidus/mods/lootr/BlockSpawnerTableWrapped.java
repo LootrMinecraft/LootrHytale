@@ -1,8 +1,6 @@
-package noobanidus.mods.lootr.plugin;
+package noobanidus.mods.lootr;
 
-import com.hypixel.hytale.builtin.blockspawner.BlockSpawnerEntry;
 import com.hypixel.hytale.builtin.blockspawner.BlockSpawnerTable;
-import com.hypixel.hytale.common.map.IWeightedMap;
 
 public class BlockSpawnerTableWrapped extends BlockSpawnerTable {
   private final BlockSpawnerTable wrapped;
