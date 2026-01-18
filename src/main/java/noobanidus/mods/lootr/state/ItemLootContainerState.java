@@ -15,7 +15,9 @@ import com.hypixel.hytale.server.core.entity.entities.player.windows.WindowManag
 import com.hypixel.hytale.server.core.inventory.container.EmptyItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer;
+import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.meta.BlockStateModule;
 import com.hypixel.hytale.server.core.universe.world.meta.state.ItemContainerState;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.universe.world.worldmap.WorldMapManager;
@@ -184,6 +186,19 @@ public class ItemLootContainerState extends ItemContainerState implements ItemLo
     @Override
     public Vector3i getPosition() {
       return ItemLootContainerState.this.getPosition();
+    }
+  }
+
+  public static ItemLootContainerState fromContainerState (ItemContainerState state) {
+    if (state instanceof ItemLootContainerState lootContainerState) {
+      return lootContainerState;
+    }
+
+    if (BlockStateModule.get().createBlockState(LootrPlugin.LOOT_CHEST_ID, state.getChunk(), state.getPosition(), LootrPlugin.getLootrChestBlockType()) instanceof ItemLootContainerState newState) {
+      newState.droplist = state.getDroplist();
+      return newState;
+    } else {
+      throw new RuntimeException();
     }
   }
 }
