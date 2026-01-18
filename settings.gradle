@@ -1,0 +1,8 @@
+pluginManagement {
+    repositories {
+        maven("https://repo.smolder.fr/public/")
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'LootrPlugin'
