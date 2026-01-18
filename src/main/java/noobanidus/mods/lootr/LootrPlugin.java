@@ -18,7 +18,7 @@ import javax.annotation.Nonnull;
 public class LootrPlugin extends JavaPlugin {
   public static ComponentType<ChunkStore, ItemContainerState> ITEM_CONTAINER_COMPONENT_TYPE = null;
 
-  private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+  public static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
   public LootrPlugin(@Nonnull JavaPluginInit init) {
     super(init);

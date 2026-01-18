@@ -30,7 +30,8 @@ import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.UUID;
 
-public class OpenLootContainerInteraction extends SimpleBlockInteraction{
+@SuppressWarnings({"removal", "DataFlowIssue", "deprecation"})
+public class OpenLootContainerInteraction extends SimpleBlockInteraction {
   public static final BuilderCodec<OpenLootContainerInteraction> CODEC = BuilderCodec.builder(
           OpenLootContainerInteraction.class, OpenLootContainerInteraction::new, SimpleBlockInteraction.CODEC
       )
@@ -49,13 +50,13 @@ public class OpenLootContainerInteraction extends SimpleBlockInteraction{
   ) {
     Ref<EntityStore> ref = context.getEntity();
     Store<EntityStore> store = ref.getStore();
-    Player playerComponent = commandBuffer.<Player>getComponent(ref, Player.getComponentType());
+    Player playerComponent = commandBuffer.getComponent(ref, Player.getComponentType());
     if (playerComponent != null) {
       BlockState container = world.getState(pos.x, pos.y, pos.z, true);
       if (container instanceof ItemLootContainerState itemContainerState) {
         BlockType blockType = world.getBlockType(pos.x, pos.y, pos.z);
         if (itemContainerState.isAllowViewing() && itemContainerState.canOpen(ref, commandBuffer)) {
-          UUIDComponent uuidComponent = commandBuffer.<UUIDComponent>getComponent(ref, UUIDComponent.getComponentType());
+          UUIDComponent uuidComponent = commandBuffer.getComponent(ref, UUIDComponent.getComponentType());
 
           assert uuidComponent != null;
 
