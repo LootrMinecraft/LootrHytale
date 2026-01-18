@@ -1,4 +1,4 @@
-package noobanidus.mods.lootr.cursed;
+package noobanidus.mods.lootr.util;
 
 import com.hypixel.hytale.builtin.blockspawner.BlockSpawnerEntry;
 import com.hypixel.hytale.component.Holder;
