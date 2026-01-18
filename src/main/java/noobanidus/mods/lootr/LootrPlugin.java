@@ -79,6 +79,9 @@ public class LootrPlugin extends JavaPlugin {
     if (entry instanceof TransformedBlockSpawnerEntry) {
       return false;
     }
+    if (entry.getBlockComponents() == null) {
+      return false;
+    }
     // It's already a loot container somehow
     if (entry.getBlockComponents().getComponent(getLootContainerType()) != null) {
       return false;

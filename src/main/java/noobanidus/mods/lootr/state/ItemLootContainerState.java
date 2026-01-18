@@ -9,6 +9,7 @@ import com.hypixel.hytale.component.ComponentAccessor;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.event.EventPriority;
+import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.entity.entities.player.windows.WindowManager;
@@ -16,6 +17,7 @@ import com.hypixel.hytale.server.core.inventory.container.EmptyItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.meta.BlockStateModule;
 import com.hypixel.hytale.server.core.universe.world.meta.state.ItemContainerState;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -87,7 +89,8 @@ public class ItemLootContainerState extends ItemContainerState {
       return false;
     }
 
-    this.capacity = 20;
+    // This capacity might be problematic but oh well
+    this.capacity = 54;
     if (blockType.getState() instanceof ItemContainerState.ItemContainerStateData itemContainerStateData) {
       this.capacity = itemContainerStateData.getCapacity();
     }
@@ -185,6 +188,50 @@ public class ItemLootContainerState extends ItemContainerState {
     @Override
     public Vector3i getPosition() {
       return ItemLootContainerState.this.getPosition();
+    }
+
+    @Override
+    public int getBlockX() {
+      return ItemLootContainerState.this.getBlockX();
+    }
+
+    @Override
+    public int getBlockY() {
+      return ItemLootContainerState.this.getBlockY();
+    }
+
+    @Override
+    public int getBlockZ() {
+      return ItemLootContainerState.this.getBlockZ();
+    }
+
+    @NonNullDecl
+    @Override
+    public Vector3i getBlockPosition() {
+      return ItemLootContainerState.this.getBlockPosition();
+    }
+
+    @NonNullDecl
+    @Override
+    public Vector3d getCenteredBlockPosition() {
+      return ItemLootContainerState.this.getCenteredBlockPosition();
+    }
+
+    @NullableDecl
+    @Override
+    public WorldChunk getChunk() {
+      return ItemLootContainerState.this.getChunk();
+    }
+
+    @NullableDecl
+    @Override
+    public BlockType getBlockType() {
+      return ItemLootContainerState.this.getBlockType();
+    }
+
+    @Override
+    public int getRotationIndex() {
+      return ItemLootContainerState.this.getRotationIndex();
     }
   }
 
