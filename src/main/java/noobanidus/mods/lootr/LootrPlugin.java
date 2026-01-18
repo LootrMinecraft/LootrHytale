@@ -35,17 +35,10 @@ public class LootrPlugin extends JavaPlugin {
   }
 
   public static boolean canWrap (BlockSpawnerEntry entry) {
-/*  if (!"container".equals(entry.getBlockName())) {
-      return false;
-    }*/
     var comp = entry.getBlockComponents().getComponent(LootrPlugin.ITEM_CONTAINER_COMPONENT_TYPE);
     if (comp == null) {
       return false;
     }
     return comp.getDroplist() != null;
-  }
-
-  public static BlockSpawnerEntry wrapEntry (BlockSpawnerEntry entry) {
-    return new TransformingBlockSpawnerEntry(entry);
   }
 }

@@ -16,6 +16,7 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import javax.annotation.Nonnull;
+import java.lang.invoke.VarHandle;
 import java.util.Set;
 
 public class BlockSpawnerPrePlugin extends RefSystem<ChunkStore> {
@@ -44,7 +45,6 @@ public class BlockSpawnerPrePlugin extends RefSystem<ChunkStore> {
         if (blockSpawnerId != null) {
           BlockSpawnerTable table = BlockSpawnerTable.getAssetMap().getAsset(blockSpawnerId);
           if (table != null) {
-            var entries = table.getEntries();
           }
         }
       }
