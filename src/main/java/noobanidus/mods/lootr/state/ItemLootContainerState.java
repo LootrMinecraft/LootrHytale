@@ -8,9 +8,9 @@ import com.hypixel.hytale.codec.codecs.map.MapCodec;
 import com.hypixel.hytale.component.ComponentAccessor;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.event.EventPriority;
 import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
-import com.hypixel.hytale.server.core.entity.entities.player.windows.ContainerBlockWindow;
 import com.hypixel.hytale.server.core.entity.entities.player.windows.WindowManager;
 import com.hypixel.hytale.server.core.inventory.container.EmptyItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
@@ -77,19 +77,24 @@ public class ItemLootContainerState extends ItemContainerState implements ItemLo
 
   @Override
   public boolean initialize(@Nonnull BlockType blockType) {
-    if (!super.initialize(blockType)) {
+    var oldCustom = this.custom;
+    this.custom = true;
+    var result = super.initialize(blockType);
+    this.custom = oldCustom;
+    if (!result) {
       return false;
-    } else {
-      this.capacity = 20;
-      if (blockType.getState() instanceof ItemContainerState.ItemContainerStateData itemContainerStateData) {
-        this.capacity = itemContainerStateData.getCapacity();
-      }
-
-      return true;
     }
+
+    this.capacity = 20;
+    if (blockType.getState() instanceof ItemContainerState.ItemContainerStateData itemContainerStateData) {
+      this.capacity = itemContainerStateData.getCapacity();
+    }
+
+    return true;
   }
 
-  public boolean canOpen(@Nonnull Ref<EntityStore> ref, @Nonnull ComponentAccessor<EntityStore> componentAccessor) {
+  public boolean canOpen
+      (@Nonnull Ref<EntityStore> ref, @Nonnull ComponentAccessor<EntityStore> componentAccessor) {
     return true;
   }
 
@@ -116,13 +121,12 @@ public class ItemLootContainerState extends ItemContainerState implements ItemLo
 
   @Override
   public void setItemContainer(SimpleItemContainer itemContainer) {
-    // TODO: NO-OP
-    return;
+    // NO-OP
   }
 
   @Override
   public void setDroplist(@Nullable String droplist) {
-    // Don't wipe it
+    // Don't wipe the drop list under any circumstances
     if (droplist == null) {
       return;
     }
@@ -143,7 +147,7 @@ public class ItemLootContainerState extends ItemContainerState implements ItemLo
   public ItemContainer getItemContainer(UUID player) {
     ItemContainer newContainer = new SimpleItemContainer(this.capacity);
     if (playerContainers.putIfAbsent(player, newContainer) == null) {
-      // TODO: Fill the new container
+      newContainer.registerChangeEvent(EventPriority.LAST, this::onItemChange);
       TemporaryContainerState temp = new TemporaryContainerState(newContainer);
       StashPlugin.stash(temp, false);
       return newContainer;
@@ -152,7 +156,7 @@ public class ItemLootContainerState extends ItemContainerState implements ItemLo
     }
   }
 
-  // TODO: Cursed?
+  // This allows us to just reuse `StashPlugin` without duplicating too much code.
   private class TemporaryContainerState extends ItemContainerState {
     private final ItemContainer container;
 
