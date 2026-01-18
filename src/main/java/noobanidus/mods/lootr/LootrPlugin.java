@@ -26,6 +26,7 @@ import java.util.function.BiConsumer;
 @SuppressWarnings("removal")
 public class LootrPlugin extends JavaPlugin {
   public static final String LOOT_CHEST_ID = "Noobanidus_Lootr_LootChest";
+  public static final String LOOT_CONTAINER_INTERACTION = "Noobanidus_Lootr_OpenLootContainer";
   private static ComponentType<ChunkStore, ItemContainerState> ITEM_CONTAINER_COMPONENT_TYPE = null;
   private static ComponentType<ChunkStore, ItemLootContainerState> ITEM_LOOT_CONTAINER_COMPONENT_TYPE = null;
   private static BlockType LOOTR_CHEST_BLOCK_TYPE = null;
@@ -50,7 +51,7 @@ public class LootrPlugin extends JavaPlugin {
     this.getBlockStateRegistry()
         .registerBlockState(ItemLootContainerState.class, LOOT_CHEST_ID, ItemLootContainerState.CODEC, ItemContainerState.ItemContainerStateData.class, ItemContainerState.ItemContainerStateData.CODEC);
     this.getChunkStoreRegistry().registerSystem(new BlockSpawnerPrePlugin());
-    this.getCodecRegistry(Interaction.CODEC).register("Noobanidus_Lootr_OpenLootContainer", OpenLootContainerInteraction.class, OpenLootContainerInteraction.CODEC);
+    this.getCodecRegistry(Interaction.CODEC).register(LOOT_CONTAINER_INTERACTION, OpenLootContainerInteraction.class, OpenLootContainerInteraction.CODEC);
   }
 
   public static ComponentType<ChunkStore, ItemContainerState> getContainerType() {

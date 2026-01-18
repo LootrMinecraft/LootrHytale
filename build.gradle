@@ -38,7 +38,7 @@ hytale {
 
         main = "noobanidus.mods.lootr.LootrPlugin"
 
-        includesAssetPack = false
+        includesAssetPack = true
         disabledByDefault = false
 
         dependency("Hytale:BlockStateModule", "*")
