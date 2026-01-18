@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.UUID;
 
+// Basically a duplicate of `OpenContainerInteraction` except it expects an `ItemLootContainerState` and it uses the `getItemContainer(UUID)` method to get a player-specific container.
 @SuppressWarnings({"removal", "DataFlowIssue", "deprecation"})
 public class OpenLootContainerInteraction extends SimpleBlockInteraction {
   public static final BuilderCodec<OpenLootContainerInteraction> CODEC = BuilderCodec.builder(
