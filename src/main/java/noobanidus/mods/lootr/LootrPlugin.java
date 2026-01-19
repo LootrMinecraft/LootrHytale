@@ -63,6 +63,16 @@ public class LootrPlugin extends JavaPlugin {
         .register(LOOT_CONTAINER_INTERACTION, OpenLootContainerInteraction.class, OpenLootContainerInteraction.CODEC);
   }
 
+  private static ComponentType<ChunkStore, ItemContainerState> ITEM_CONTAINER_STATE_COMPONENT_TYPE = null;
+
+  public static ComponentType<ChunkStore, ItemContainerState> getContainerType() {
+    if (ITEM_CONTAINER_STATE_COMPONENT_TYPE == null) {
+      ITEM_CONTAINER_STATE_COMPONENT_TYPE = BlockStateModule.get()
+          .getComponentType(ItemContainerState.class);
+    }
+    return ITEM_CONTAINER_STATE_COMPONENT_TYPE;
+  }
+
   public static ComponentType<ChunkStore, ItemLootContainerState> getLootContainerType() {
     if (ITEM_LOOT_CONTAINER_COMPONENT_TYPE == null) {
       ITEM_LOOT_CONTAINER_COMPONENT_TYPE = BlockStateModule.get().getComponentType(ItemLootContainerState.class);
@@ -88,8 +98,7 @@ public class LootrPlugin extends JavaPlugin {
     if (entry.getBlockComponents().getComponent(getLootContainerType()) != null) {
       return false;
     }
-    var comp = entry.getBlockComponents().getComponent(Objects.requireNonNull(BlockStateModule.get()
-        .getComponentType(ItemLootContainerState.class)));
+    var comp = entry.getBlockComponents().getComponent(getContainerType());
     if (comp == null) {
       return false;
     }
@@ -107,11 +116,9 @@ public class LootrPlugin extends JavaPlugin {
     for (BlockSpawnerEntry entry : table.getEntries().internalKeys()) {
       if (canWrap(entry)) {
         var comp = entry.getBlockComponents().clone();
-        var state = comp.getComponent(Objects.requireNonNull(BlockStateModule.get()
-            .getComponentType(ItemLootContainerState.class)));
-        comp.removeComponent(Objects.requireNonNull(BlockStateModule.get()
-            .getComponentType(ItemLootContainerState.class)));
-        comp.addComponent(getLootContainerType(), ItemLootContainerState.fromContainerState(state));
+        var state = comp.getComponent(getContainerType());
+        comp.removeComponent(getContainerType());
+        comp.addComponent(getLootContainerType(), ItemLootContainerState.fromContainerState(entry.getBlockName(), state));
         entries.add(new TransformedBlockSpawnerEntry(entry, LootrPlugin.LOOT_CHEST_ID, comp));
       } else {
         entries.add(entry);

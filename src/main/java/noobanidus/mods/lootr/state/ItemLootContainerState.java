@@ -80,7 +80,12 @@ public class ItemLootContainerState extends ItemContainerState {
       )
       .build();
   protected Map<UUID, ItemContainer> playerContainers = new ConcurrentHashMap<>();
-  protected short capacity;
+  protected short capacity = -1;
+  protected String originalBlock;
+
+  public void setOriginalBlock (String originalBlock) {
+    this.originalBlock = originalBlock;
+  }
 
   @Override
   public boolean initialize(@Nonnull BlockType blockType) {
@@ -92,35 +97,23 @@ public class ItemLootContainerState extends ItemContainerState {
       return false;
     }
 
-    // TODO: This needs to be checked somehow/somewhere: is it using the state from the correct blocktype?
-    this.capacity = 54;
-    if (blockType.getState() instanceof ItemContainerState.ItemContainerStateData itemContainerStateData) {
-      this.capacity = itemContainerStateData.getCapacity();
+    if (this.capacity == -1) {
+      this.capacity = 54;
+    }
+    if (originalBlock != null) {
+      BlockType originalBlockType = BlockType.getAssetMap().getAsset(originalBlock);
+      if (originalBlockType != null && originalBlockType.getState() instanceof ItemContainerStateData data) {
+        this.capacity = data.getCapacity();
+      }
     }
 
     return true;
   }
 
-  public boolean canOpen
-      (@Nonnull Ref<EntityStore> ref, @Nonnull ComponentAccessor<EntityStore> componentAccessor) {
-    return true;
-  }
-
-  public void onOpen(@Nonnull Ref<EntityStore> ref, @Nonnull World world, @Nonnull Store<EntityStore> store) {
-  }
-
   @Override
   public void onDestroy() {
     WindowManager.closeAndRemoveAll(this.getWindows());
-    /*    WorldChunk chunk = this.getChunk();*/
-    /*    World world = chunk.getWorld();*/
-    /*    Store<EntityStore> store = world.getEntityStore().getStore();*/
-/*    List<ItemStack> allItemStacks = this.itemContainer.dropAllItemStacks();
-    Vector3d dropPosition = this.getBlockPosition().toVector3d().add(0.5, 0.0, 0.5);
-    Holder<EntityStore>[] itemEntityHolders = ItemComponent.generateItemDrops(store, allItemStacks, dropPosition, Vector3f.ZERO);
-    if (itemEntityHolders.length > 0) {
-      world.execute(() -> store.addEntities(itemEntityHolders, AddReason.SPAWN));
-    }*/
+    // We don't drop any contents as that would be confusing
 
     if (this.marker != null) {
       this.marker.remove();
@@ -145,10 +138,6 @@ public class ItemLootContainerState extends ItemContainerState {
   @Override
   public ItemContainer getItemContainer() {
     return EmptyItemContainer.INSTANCE;
-  }
-
-  public void onItemChange(ItemContainer.ItemContainerChangeEvent event) {
-    this.markNeedsSave();
   }
 
   public ItemContainer getItemContainer(Player playerComponent, UUID player) {
@@ -243,7 +232,7 @@ public class ItemLootContainerState extends ItemContainerState {
     }
   }
 
-  public static ItemLootContainerState fromContainerState(ItemContainerState state) {
+  public static ItemLootContainerState fromContainerState(String originalBlockName, ItemContainerState state) {
     if (state instanceof ItemLootContainerState lootContainerState) {
       return lootContainerState;
     }
@@ -253,6 +242,7 @@ public class ItemLootContainerState extends ItemContainerState {
       throw new RuntimeException();
     }
     // TODO: This initialize will override the capacity of `state`
+    newState.setOriginalBlock(originalBlockName);
     newState.initialize(LootrPlugin.getLootrChestBlockType());
     newState.droplist = state.getDroplist();
     return newState;
