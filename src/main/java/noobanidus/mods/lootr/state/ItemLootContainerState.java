@@ -101,7 +101,7 @@ public class ItemLootContainerState extends ItemContainerState {
     }
 
     if (this.capacity == -1) {
-      this.capacity = 54;
+      this.capacity = 10;
     }
 
     if (originalBlock != null) {
