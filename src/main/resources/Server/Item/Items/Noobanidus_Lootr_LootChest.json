@@ -49,6 +49,7 @@
       ]
     },
     "VariantRotation": "NESW",
+    "InteractionHint": "server.interactionHints.open",
     "Interactions": {
       "Use": "Noobanidus_Lootr_OpenLootContainer"
     }
