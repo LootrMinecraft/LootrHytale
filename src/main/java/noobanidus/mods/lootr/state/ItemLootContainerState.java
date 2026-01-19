@@ -11,7 +11,9 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.event.EventPriority;
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3i;
+import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.windows.WindowManager;
 import com.hypixel.hytale.server.core.inventory.container.EmptyItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
@@ -29,6 +31,7 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -148,8 +151,13 @@ public class ItemLootContainerState extends ItemContainerState {
     this.markNeedsSave();
   }
 
-  public ItemContainer getItemContainer(UUID player) {
+  public ItemContainer getItemContainer(Player playerComponent, UUID player) {
     ItemContainer newContainer = new SimpleItemContainer(this.capacity);
+    if ("".equals(droplist) || droplist == null || droplist.isEmpty()) {
+      playerComponent.sendMessage(
+          Message.translation("general.Noobanidus_Lootr.NoDropList").bold(true).color(Color.red)
+      );
+    }
     if (playerContainers.putIfAbsent(player, newContainer) == null) {
       newContainer.registerChangeEvent(EventPriority.LAST, this::onItemChange);
       TemporaryContainerState temp = new TemporaryContainerState(newContainer);
