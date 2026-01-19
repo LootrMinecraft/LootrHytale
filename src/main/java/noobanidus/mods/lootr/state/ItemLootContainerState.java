@@ -89,7 +89,7 @@ public class ItemLootContainerState extends ItemContainerState {
       return false;
     }
 
-    // This capacity might be problematic but oh well
+    // TODO: This needs to be checked somehow/somewhere: is it using the state from the correct blocktype?
     this.capacity = 54;
     if (blockType.getState() instanceof ItemContainerState.ItemContainerStateData itemContainerStateData) {
       this.capacity = itemContainerStateData.getCapacity();

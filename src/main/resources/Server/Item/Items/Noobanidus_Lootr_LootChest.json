@@ -1,7 +1,7 @@
 {
   "TranslationProperties": {
-    "Name": "server.items.Noobanidus_Lootr_LootChest.name",
-    "Description": "server.items.Noobanidus_Lootr_LootChest.description"
+    "Name": "items.Noobanidus_Lootr_LootChest.name",
+    "Description": "items.Noobanidus_Lootr_LootChest.description"
   },
   "PlayerAnimationsId": "Block",
   "Categories": [
@@ -27,14 +27,6 @@
     "Material": "Solid",
     "Opacity": "Transparent",
     "ParticleColor": "#7a3d27",
-    "ConnectedBlockRuleSet": {
-      "Type": "CustomTemplate",
-      "TemplateShapeAssetId": "ChestConnectedBlockTemplate",
-      "TemplateShapeBlockPatterns": {
-        "Default": "Furniture_Dungeon_Chest_Epic",
-        "Double": "Furniture_Dungeon_Chest_Epic_Large"
-      }
-    },
     "State": {
       "Id": "container",
       "Capacity": 18,

@@ -15,21 +15,25 @@ import com.hypixel.hytale.server.core.universe.world.meta.state.ItemContainerSta
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import noobanidus.mods.lootr.interaction.OpenLootContainerInteraction;
 import noobanidus.mods.lootr.state.ItemLootContainerState;
+import noobanidus.mods.lootr.system.BlockSpawnerPreSystem;
 import noobanidus.mods.lootr.util.ReflectionHelper;
 import noobanidus.mods.lootr.util.TransformedBlockSpawnerEntry;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 @SuppressWarnings("removal")
 public class LootrPlugin extends JavaPlugin {
   public static final String LOOT_CHEST_ID = "Noobanidus_Lootr_LootChest";
   public static final String LOOT_CONTAINER_INTERACTION = "Noobanidus_Lootr_OpenLootContainer";
-  private static ComponentType<ChunkStore, ItemContainerState> ITEM_CONTAINER_COMPONENT_TYPE = null;
   private static ComponentType<ChunkStore, ItemLootContainerState> ITEM_LOOT_CONTAINER_COMPONENT_TYPE = null;
   private static BlockType LOOTR_CHEST_BLOCK_TYPE = null;
+  private static final Set<String> WRAPPED_TABLES = ConcurrentHashMap.newKeySet();
 
   @SuppressWarnings("rawtypes")
   private static BiConsumer<BlockSpawnerTable, IWeightedMap> BLOCK_SPAWNER_ACCESSOR;
@@ -45,20 +49,18 @@ public class LootrPlugin extends JavaPlugin {
     );
   }
 
+  public static boolean isWrapped(String blockSpawnerId) {
+    return WRAPPED_TABLES.contains(blockSpawnerId);
+  }
+
   @Override
   protected void setup() {
     super.setup();
     this.getBlockStateRegistry()
         .registerBlockState(ItemLootContainerState.class, LOOT_CHEST_ID, ItemLootContainerState.CODEC, ItemContainerState.ItemContainerStateData.class, ItemContainerState.ItemContainerStateData.CODEC);
-    this.getChunkStoreRegistry().registerSystem(new BlockSpawnerPrePlugin());
-    this.getCodecRegistry(Interaction.CODEC).register(LOOT_CONTAINER_INTERACTION, OpenLootContainerInteraction.class, OpenLootContainerInteraction.CODEC);
-  }
-
-  public static ComponentType<ChunkStore, ItemContainerState> getContainerType() {
-    if (ITEM_CONTAINER_COMPONENT_TYPE == null) {
-      ITEM_CONTAINER_COMPONENT_TYPE = BlockStateModule.get().getComponentType(ItemContainerState.class);
-    }
-    return ITEM_CONTAINER_COMPONENT_TYPE;
+    this.getChunkStoreRegistry().registerSystem(new BlockSpawnerPreSystem());
+    this.getCodecRegistry(Interaction.CODEC)
+        .register(LOOT_CONTAINER_INTERACTION, OpenLootContainerInteraction.class, OpenLootContainerInteraction.CODEC);
   }
 
   public static ComponentType<ChunkStore, ItemLootContainerState> getLootContainerType() {
@@ -86,7 +88,8 @@ public class LootrPlugin extends JavaPlugin {
     if (entry.getBlockComponents().getComponent(getLootContainerType()) != null) {
       return false;
     }
-    var comp = entry.getBlockComponents().getComponent(getContainerType());
+    var comp = entry.getBlockComponents().getComponent(Objects.requireNonNull(BlockStateModule.get()
+        .getComponentType(ItemLootContainerState.class)));
     if (comp == null) {
       return false;
     }
@@ -96,13 +99,18 @@ public class LootrPlugin extends JavaPlugin {
     return comp.getDroplist() != null;
   }
 
-  public static void wrapTable(BlockSpawnerTable table) {
+  public static void wrapTable(String blockStateId, BlockSpawnerTable table) {
+    if (isWrapped(blockStateId)) {
+      return;
+    }
     List<BlockSpawnerEntry> entries = new ArrayList<>();
     for (BlockSpawnerEntry entry : table.getEntries().internalKeys()) {
       if (canWrap(entry)) {
         var comp = entry.getBlockComponents().clone();
-        var state = comp.getComponent(getContainerType());
-        comp.removeComponent(getContainerType());
+        var state = comp.getComponent(Objects.requireNonNull(BlockStateModule.get()
+            .getComponentType(ItemLootContainerState.class)));
+        comp.removeComponent(Objects.requireNonNull(BlockStateModule.get()
+            .getComponentType(ItemLootContainerState.class)));
         comp.addComponent(getLootContainerType(), ItemLootContainerState.fromContainerState(state));
         entries.add(new TransformedBlockSpawnerEntry(entry, LootrPlugin.LOOT_CHEST_ID, comp));
       } else {
@@ -111,5 +119,6 @@ public class LootrPlugin extends JavaPlugin {
     }
     BLOCK_SPAWNER_ACCESSOR.accept(table, WeightedMap.builder(BlockSpawnerEntry.EMPTY_ARRAY)
         .putAll(entries.toArray(BlockSpawnerEntry[]::new), BlockSpawnerEntry::getWeight).build());
+    WRAPPED_TABLES.add(blockStateId);
   }
 }

@@ -1,4 +1,4 @@
-package noobanidus.mods.lootr;
+package noobanidus.mods.lootr.system;
 
 import com.hypixel.hytale.builtin.blockspawner.BlockSpawnerTable;
 import com.hypixel.hytale.builtin.blockspawner.state.BlockSpawner;
@@ -12,17 +12,17 @@ import com.hypixel.hytale.protocol.GameMode;
 import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.universe.world.WorldConfig;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
+import noobanidus.mods.lootr.LootrPlugin;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import javax.annotation.Nonnull;
-import java.lang.invoke.VarHandle;
 import java.util.Set;
 
-public class BlockSpawnerPrePlugin extends RefSystem<ChunkStore> {
+public class BlockSpawnerPreSystem extends RefSystem<ChunkStore> {
   private final Set<Dependency<ChunkStore>> dependencies;
 
-  public BlockSpawnerPrePlugin() {
+  public BlockSpawnerPreSystem() {
     Class<RefSystem<ChunkStore>> cls;
     try {
       //noinspection unchecked
@@ -42,10 +42,10 @@ public class BlockSpawnerPrePlugin extends RefSystem<ChunkStore> {
 
       if (state != null && info != null) {
         String blockSpawnerId = state.getBlockSpawnerId();
-        if (blockSpawnerId != null) {
+        if (blockSpawnerId != null && !LootrPlugin.isWrapped(blockSpawnerId)) {
           BlockSpawnerTable table = BlockSpawnerTable.getAssetMap().getAsset(blockSpawnerId);
           if (table != null) {
-            LootrPlugin.wrapTable(table);
+            LootrPlugin.wrapTable(blockSpawnerId, table);
           }
         }
       }
@@ -54,7 +54,7 @@ public class BlockSpawnerPrePlugin extends RefSystem<ChunkStore> {
 
   @Override
   public void onEntityRemove(@NonNullDecl Ref<ChunkStore> var1, @NonNullDecl RemoveReason var2, @NonNullDecl Store<ChunkStore> var3, @NonNullDecl CommandBuffer<ChunkStore> var4) {
-
+    // NO-OP
   }
 
   @NullableDecl
