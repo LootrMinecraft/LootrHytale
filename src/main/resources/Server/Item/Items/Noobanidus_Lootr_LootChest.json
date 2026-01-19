@@ -48,13 +48,6 @@
         }
       ]
     },
-    "Support": {
-      "Down": [
-        {
-          "FaceType": "Full"
-        }
-      ]
-    },
     "VariantRotation": "NESW",
     "Interactions": {
       "Use": "Noobanidus_Lootr_OpenLootContainer"
