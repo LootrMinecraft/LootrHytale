@@ -127,7 +127,7 @@ public class ItemLootContainerState extends ItemContainerState {
 
   @Override
   public void setDroplist(@Nullable String droplist) {
-    // Don't wipe the drop list under any circumstances
+    // Wiping the droplist means we can never generate loot again, so we don't do it
     if (droplist == null) {
       return;
     }
@@ -157,7 +157,8 @@ public class ItemLootContainerState extends ItemContainerState {
     }
   }
 
-  // This allows us to just reuse `StashPlugin` without duplicating too much code.
+  // This monstrosity allows us to reuse `StashPlugin::stash` without cloning it
+  // TODO: If at any point StashPlugin is adjusted and tries to access other methods of ItemContainerState, this will most likely break as they'll end up being null.
   private class TemporaryContainerState extends ItemContainerState {
     private final ItemContainer container;
 
