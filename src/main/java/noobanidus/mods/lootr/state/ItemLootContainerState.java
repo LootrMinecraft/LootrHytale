@@ -252,6 +252,7 @@ public class ItemLootContainerState extends ItemContainerState {
     if (newState == null) {
       throw new RuntimeException();
     }
+    // TODO: This initialize will override the capacity of `state`
     newState.initialize(LootrPlugin.getLootrChestBlockType());
     newState.droplist = state.getDroplist();
     return newState;
