@@ -47,6 +47,7 @@ public class ItemLootContainerState extends ItemContainerState {
       .addField(new KeyedCodec<>("Custom", Codec.BOOLEAN), (state, o) -> state.custom = o, state -> state.custom)
       .addField(new KeyedCodec<>("AllowViewing", Codec.BOOLEAN), (state, o) -> state.allowViewing = o, state -> state.allowViewing)
       .addField(new KeyedCodec<>("Droplist", Codec.STRING), (state, o) -> state.droplist = o, state -> state.droplist)
+      .addField(new KeyedCodec<>("OriginalBlock", Codec.STRING), (state, o) -> state.originalBlock = o, state -> state.originalBlock)
       .addField(
           new KeyedCodec<>("Marker", WorldMapManager.MarkerReference.CODEC),
           (state, o) -> state.marker = o,
@@ -56,7 +57,7 @@ public class ItemLootContainerState extends ItemContainerState {
           new KeyedCodec<>("PlayerContainers",
               new MapCodec<>(ItemContainer.CODEC, ConcurrentHashMap::new)),
           (state, o) -> {
-            // Transform from String to UUID
+            // TODO: I'm just defaulting to UUID/String conversion because Minecraft generally doesn't support non-String keys when serializing maps.
             ConcurrentHashMap<UUID, ItemContainer> newMap = new ConcurrentHashMap<>();
             for (Map.Entry<String, ItemContainer> entry : o.entrySet()) {
               try {
@@ -70,7 +71,6 @@ public class ItemLootContainerState extends ItemContainerState {
             state.playerContainers = newMap;
           },
           state -> {
-            // Transform from UUID to String
             HashMap<String, ItemContainer> temp = new HashMap<>();
             for (Map.Entry<UUID, ItemContainer> entry : state.playerContainers.entrySet()) {
               temp.put(entry.getKey().toString(), entry.getValue());
@@ -81,6 +81,7 @@ public class ItemLootContainerState extends ItemContainerState {
       .build();
   protected Map<UUID, ItemContainer> playerContainers = new ConcurrentHashMap<>();
   protected short capacity = -1;
+  // This is serialized in case we want to de-convert at some point
   protected String originalBlock;
 
   public void setOriginalBlock (String originalBlock) {
@@ -100,6 +101,7 @@ public class ItemLootContainerState extends ItemContainerState {
     if (this.capacity == -1) {
       this.capacity = 54;
     }
+
     if (originalBlock != null) {
       BlockType originalBlockType = BlockType.getAssetMap().getAsset(originalBlock);
       if (originalBlockType != null && originalBlockType.getState() instanceof ItemContainerStateData data) {
