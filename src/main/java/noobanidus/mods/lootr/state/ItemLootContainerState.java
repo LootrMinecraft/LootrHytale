@@ -163,13 +163,15 @@ public class ItemLootContainerState extends ItemContainerState {
 
 /*  @Override
   public void tick(float tick, int index, ArchetypeChunk<ChunkStore> archetype, Store<ChunkStore> store, CommandBuffer<ChunkStore> commandBuffer) {
-    Vector3d vector3d = transformcomponent.getPosition();
-    SpatialResource<Ref<EntityStore>, EntityStore> spatialresource = commandBuffer.getResource(
+    Vector3d vector3d = this.getCenteredBlockPosition();
+    var entityStore = commandBuffer.getExternalData().getWorld().getEntityStore().getStore();
+    var spatialresource = entityStore
+        .getResource(
         EntityModule.get().getPlayerSpatialResourceType()
     );
     ObjectList<Ref<EntityStore>> objectlist = SpatialResource.getThreadLocalReferenceList();
     spatialresource.getSpatialStructure().collect(vector3d, 75.0, objectlist);
-    ParticleUtil.spawnParticleEffect(this.particle, vector3d, objectlist, commandBuffer);
+    ParticleUtil.spawnParticleEffect("Dust_Sparkles_Fine", vector3d, objectlist, entityStore);
   }*/
 
   // This monstrosity allows us to reuse `StashPlugin::stash` without cloning it
