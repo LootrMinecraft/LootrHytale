@@ -28,7 +28,7 @@
     "Opacity": "Transparent",
     "ParticleColor": "#7a3d27",
     "State": {
-      "Id": "container",
+      "Id": "Noobanidus_Lootr_LootChest",
       "Capacity": 18,
       "Definitions": {
         "CloseWindow": {
