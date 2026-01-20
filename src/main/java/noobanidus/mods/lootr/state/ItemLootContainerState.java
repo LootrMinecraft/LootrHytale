@@ -6,18 +6,21 @@ import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.map.MapCodec;
 import com.hypixel.hytale.component.*;
+import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.spatial.SpatialResource;
 import com.hypixel.hytale.event.EventPriority;
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.windows.WindowManager;
 import com.hypixel.hytale.server.core.inventory.container.EmptyItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer;
 import com.hypixel.hytale.server.core.modules.entity.EntityModule;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.ParticleUtil;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.state.TickableBlockState;
@@ -41,7 +44,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 @SuppressWarnings({"removal", "deprecation"})
-public class ItemLootContainerState extends ItemContainerState {
+public class ItemLootContainerState extends ItemContainerState implements TickableBlockState {
   public static final Codec<ItemLootContainerState> CODEC = BuilderCodec.builder(
           ItemLootContainerState.class, ItemLootContainerState::new, ItemContainerState.BASE_CODEC
       )
@@ -86,7 +89,7 @@ public class ItemLootContainerState extends ItemContainerState {
   // This is serialized in case we want to de-convert at some point
   protected String originalBlock;
 
-  public void setOriginalBlock (String originalBlock) {
+  public void setOriginalBlock(String originalBlock) {
     this.originalBlock = originalBlock;
   }
 
@@ -161,18 +164,43 @@ public class ItemLootContainerState extends ItemContainerState {
     }
   }
 
-/*  @Override
+  @NullableDecl
+  @Override
+  public Component<ChunkStore> clone() {
+    return super.clone();
+  }
+
+  @Override
   public void tick(float tick, int index, ArchetypeChunk<ChunkStore> archetype, Store<ChunkStore> store, CommandBuffer<ChunkStore> commandBuffer) {
-    Vector3d vector3d = this.getCenteredBlockPosition();
-    var entityStore = commandBuffer.getExternalData().getWorld().getEntityStore().getStore();
-    var spatialresource = entityStore
-        .getResource(
-        EntityModule.get().getPlayerSpatialResourceType()
-    );
-    ObjectList<Ref<EntityStore>> objectlist = SpatialResource.getThreadLocalReferenceList();
-    spatialresource.getSpatialStructure().collect(vector3d, 75.0, objectlist);
-    ParticleUtil.spawnParticleEffect("Dust_Sparkles_Fine", vector3d, objectlist, entityStore);
-  }*/
+      ComponentType<EntityStore, PlayerRef> componenttype = PlayerRef.getComponentType();
+
+      Vector3d vector3d = this.getCenteredBlockPosition();
+      var entityStore = commandBuffer.getExternalData().getWorld().getEntityStore().getStore();
+      var spatialresource = entityStore
+          .getResource(
+              EntityModule.get().getPlayerSpatialResourceType()
+          );
+      ObjectList<Ref<EntityStore>> objectlist = SpatialResource.getThreadLocalReferenceList();
+      spatialresource.getSpatialStructure().collect(vector3d, 75.0, objectlist);
+      objectlist.removeIf(ref -> {
+        if (!ref.isValid()) {
+          return true;
+        }
+
+        if (playerContainers.isEmpty()) {
+          return false;
+        }
+
+        PlayerRef playerref = entityStore.getComponent(ref, componenttype);
+        // TODO: Migrate to the UUID component
+        if (playerref == null) {
+          return true;
+        }
+
+        return playerContainers.containsKey(playerref.getUuid());
+      });
+      ParticleUtil.spawnParticleEffect("Noobanidus_Lootr_UnopenedChestSparkles", vector3d, objectlist, entityStore);
+  }
 
   // This monstrosity allows us to reuse `StashPlugin::stash` without cloning it
   // TODO: If at any point StashPlugin is adjusted and tries to access other methods of ItemContainerState, this will most likely break as they'll end up being null.

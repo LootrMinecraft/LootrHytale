@@ -1,0 +1,10 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Noobanidus_Lootr_UnopenedChestSparkles",
+      "FixedRotation": true
+    }
+  ],
+  "LifeSpan": 3,
+  "CullDistance": 50
+}
