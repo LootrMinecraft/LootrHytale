@@ -15,6 +15,7 @@ import com.hypixel.hytale.server.core.universe.world.meta.state.ItemContainerSta
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import noobanidus.mods.lootr.interaction.OpenLootContainerInteraction;
 import noobanidus.mods.lootr.state.ItemLootContainerState;
+import noobanidus.mods.lootr.system.BlockBreakEventSystem;
 import noobanidus.mods.lootr.system.BlockSpawnerPreSystem;
 import noobanidus.mods.lootr.util.ReflectionHelper;
 import noobanidus.mods.lootr.util.TransformedBlockSpawnerEntry;
@@ -61,6 +62,7 @@ public class LootrPlugin extends JavaPlugin {
     this.getChunkStoreRegistry().registerSystem(new BlockSpawnerPreSystem());
     this.getCodecRegistry(Interaction.CODEC)
         .register(LOOT_CONTAINER_INTERACTION, OpenLootContainerInteraction.class, OpenLootContainerInteraction.CODEC);
+    this.getEntityStoreRegistry().registerSystem(new BlockBreakEventSystem());
   }
 
   private static ComponentType<ChunkStore, ItemContainerState> ITEM_CONTAINER_STATE_COMPONENT_TYPE = null;
