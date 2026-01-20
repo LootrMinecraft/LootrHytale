@@ -29,7 +29,7 @@
     "ParticleColor": "#7a3d27",
     "State": {
       "Id": "Noobanidus_Lootr_LootChest",
-      "Capacity": 18,
+      "Capacity": 1,
       "Definitions": {
         "CloseWindow": {
           "InteractionSoundEventId": "SFX_Chest_Wooden_Close",

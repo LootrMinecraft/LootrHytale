@@ -104,7 +104,7 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
     }
 
     if (this.capacity == -1) {
-      this.capacity = 10;
+      this.capacity = 1;
     }
 
     if (originalBlock != null) {
