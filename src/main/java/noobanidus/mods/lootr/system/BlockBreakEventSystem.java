@@ -26,14 +26,22 @@ public class BlockBreakEventSystem extends EntityEventSystem<EntityStore, BreakB
 
   @Override
   public void handle(int var1, @NonNullDecl ArchetypeChunk<EntityStore> var2, @NonNullDecl Store<EntityStore> var3, @NonNullDecl CommandBuffer<EntityStore> var4, @NonNullDecl BreakBlockEvent var5) {
+    if (var5.isCancelled()) {
+      return;
+    }
     if (var5.getBlockType().equals(LootrPlugin.getLootrChestBlockType())) {
       Ref<EntityStore> ref = var2.getReferenceTo(var1);
       Player player = var2.getComponent(var1, Player.getComponentType());
       if (player != null) {
-        if (player.getGameMode() == GameMode.Creative) {
-          var movement = var4.getComponent(ref, MovementStatesComponent.getComponentType());
-          if (movement != null && !movement.getMovementStates().crouching) {
-            // TODO: Send a message to tell them to crouch in creative
+        var movement = var4.getComponent(ref, MovementStatesComponent.getComponentType());
+        if (movement != null && !movement.getMovementStates().crouching) {
+          // TODO: Messages send multiple times which is annoying
+          if (player.getGameMode() == GameMode.Creative) {
+            player.sendMessage(
+                Message.translation("general.Noobanidus_Lootr.CrouchToBreakCreative").bold(true).color(Color.red)
+            );
+            var5.setCancelled(true);
+          } else {
             player.sendMessage(
                 Message.translation("general.Noobanidus_Lootr.CrouchToBreak").bold(true).color(Color.red)
             );

@@ -23,6 +23,11 @@
     "Flags": {
       "IsUsable": true
     },
+    "Gathering": {
+      "Breaking": {
+        "GatherType": "Woods"
+      }
+    },
     "HitboxType": "Full",
     "Material": "Solid",
     "Opacity": "Transparent",
@@ -51,6 +56,7 @@
     "VariantRotation": "NESW",
     "InteractionHint": "server.interactionHints.open",
     "Interactions": {
+      "Primary": "Break_Container",
       "Use": "Noobanidus_Lootr_OpenLootContainer"
     }
   },
