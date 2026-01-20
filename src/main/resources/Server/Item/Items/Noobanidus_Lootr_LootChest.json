@@ -19,6 +19,10 @@
         "Weight": 1
       }
     ],
+    "BlockEntity": {
+      "Components": {
+      }
+    },
     "DrawType": "Model",
     "Flags": {
       "IsUsable": true
