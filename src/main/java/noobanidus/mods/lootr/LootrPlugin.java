@@ -13,6 +13,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.world.meta.BlockStateModule;
 import com.hypixel.hytale.server.core.universe.world.meta.state.ItemContainerState;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
+import noobanidus.mods.lootr.component.UUIDComponent;
 import noobanidus.mods.lootr.interaction.OpenLootContainerInteraction;
 import noobanidus.mods.lootr.state.ItemLootContainerState;
 import noobanidus.mods.lootr.system.BlockBreakEventSystem;
@@ -30,9 +31,11 @@ import java.util.function.BiConsumer;
 
 @SuppressWarnings("removal")
 public class LootrPlugin extends JavaPlugin {
+  public static final String LOOT_UUID = "Noobanidus_Lootr_LootId";
   public static final String LOOT_CHEST_ID = "Noobanidus_Lootr_LootChest";
   public static final String LOOT_CONTAINER_INTERACTION = "Noobanidus_Lootr_OpenLootContainer";
   private static ComponentType<ChunkStore, ItemLootContainerState> ITEM_LOOT_CONTAINER_COMPONENT_TYPE = null;
+  private static ComponentType<ChunkStore, UUIDComponent> UUID_COMPONENT_TYPE = null;
   private static BlockType LOOTR_CHEST_BLOCK_TYPE = null;
   private static final Set<String> WRAPPED_TABLES = ConcurrentHashMap.newKeySet();
 
@@ -63,6 +66,7 @@ public class LootrPlugin extends JavaPlugin {
     this.getCodecRegistry(Interaction.CODEC)
         .register(LOOT_CONTAINER_INTERACTION, OpenLootContainerInteraction.class, OpenLootContainerInteraction.CODEC);
     this.getEntityStoreRegistry().registerSystem(new BlockBreakEventSystem());
+    UUID_COMPONENT_TYPE = this.getChunkStoreRegistry().registerComponent(UUIDComponent.class, LOOT_UUID, UUIDComponent.CODEC);
   }
 
   private static ComponentType<ChunkStore, ItemContainerState> ITEM_CONTAINER_STATE_COMPONENT_TYPE = null;
@@ -80,6 +84,10 @@ public class LootrPlugin extends JavaPlugin {
       ITEM_LOOT_CONTAINER_COMPONENT_TYPE = BlockStateModule.get().getComponentType(ItemLootContainerState.class);
     }
     return ITEM_LOOT_CONTAINER_COMPONENT_TYPE;
+  }
+
+  public static ComponentType<ChunkStore, UUIDComponent> getUuidComponentType() {
+    return Objects.requireNonNull(UUID_COMPONENT_TYPE, "UUID Component Type has not been initialized yet");
   }
 
   public static BlockType getLootrChestBlockType() {

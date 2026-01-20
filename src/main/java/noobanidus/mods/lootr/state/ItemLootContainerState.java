@@ -13,12 +13,12 @@ import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
-import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.windows.WindowManager;
 import com.hypixel.hytale.server.core.inventory.container.EmptyItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer;
+import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.modules.entity.EntityModule;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.ParticleUtil;
@@ -30,6 +30,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.universe.world.worldmap.WorldMapManager;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import noobanidus.mods.lootr.LootrPlugin;
+import noobanidus.mods.lootr.component.UUIDComponent;
 import org.bson.BsonDocument;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
@@ -88,6 +89,8 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
   protected short capacity = -1;
   // This is serialized in case we want to de-convert at some point
   protected String originalBlock;
+
+  private UUID uuid = null;
 
   public void setOriginalBlock(String originalBlock) {
     this.originalBlock = originalBlock;
@@ -172,34 +175,59 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
 
   @Override
   public void tick(float tick, int index, ArchetypeChunk<ChunkStore> archetype, Store<ChunkStore> store, CommandBuffer<ChunkStore> commandBuffer) {
-      ComponentType<EntityStore, PlayerRef> componenttype = PlayerRef.getComponentType();
 
-      Vector3d vector3d = this.getCenteredBlockPosition();
-      var entityStore = commandBuffer.getExternalData().getWorld().getEntityStore().getStore();
-      var spatialresource = entityStore
-          .getResource(
-              EntityModule.get().getPlayerSpatialResourceType()
-          );
-      ObjectList<Ref<EntityStore>> objectlist = SpatialResource.getThreadLocalReferenceList();
-      spatialresource.getSpatialStructure().collect(vector3d, 75.0, objectlist);
-      objectlist.removeIf(ref -> {
-        if (!ref.isValid()) {
-          return true;
+    if (uuid == null) {
+      uuid = UUID.randomUUID();
+      commandBuffer.run((chunkStore) -> {
+        var worldchunk = this.getChunk();
+        var blockEntity = worldchunk.getBlockComponentEntity(this.getBlockX(), this.getBlockY(), this.getBlockZ());
+        if (blockEntity == null) {
+          blockEntity = BlockModule.ensureBlockEntity(worldchunk, this.getBlockX(), this.getBlockY(), this.getBlockZ());
         }
 
-        if (playerContainers.isEmpty()) {
-          return false;
+        if (blockEntity != null) {
+          var currentUuid = chunkStore.getComponent(blockEntity, LootrPlugin.getUuidComponentType());
+          if (currentUuid == null) {
+            chunkStore.putComponent(blockEntity, LootrPlugin.getUuidComponentType(), new UUIDComponent(uuid));
+          } else {
+            uuid = currentUuid.getUuid();
+          }
+        } else {
+          // Log that we couldn't store the uuid
+          LootrPlugin.LOGGER.at(Level.WARNING).log("Could not store UUID for Lootr chest at %s.", this.getCenteredBlockPosition());
         }
-
-        PlayerRef playerref = entityStore.getComponent(ref, componenttype);
-        // TODO: Migrate to the UUID component
-        if (playerref == null) {
-          return true;
-        }
-
-        return playerContainers.containsKey(playerref.getUuid());
       });
-      ParticleUtil.spawnParticleEffect("Noobanidus_Lootr_UnopenedChestSparkles", vector3d, objectlist, entityStore);
+    }
+
+    // This section does pretty particles
+    ComponentType<EntityStore, PlayerRef> componenttype = PlayerRef.getComponentType();
+
+    Vector3d vector3d = this.getCenteredBlockPosition();
+    var entityStore = commandBuffer.getExternalData().getWorld().getEntityStore().getStore();
+    var spatialresource = entityStore
+        .getResource(
+            EntityModule.get().getPlayerSpatialResourceType()
+        );
+    ObjectList<Ref<EntityStore>> objectlist = SpatialResource.getThreadLocalReferenceList();
+    spatialresource.getSpatialStructure().collect(vector3d, 30.0, objectlist);
+    objectlist.removeIf(ref -> {
+      if (!ref.isValid()) {
+        return true;
+      }
+
+      if (playerContainers.isEmpty()) {
+        return false;
+      }
+
+      PlayerRef playerref = entityStore.getComponent(ref, componenttype);
+      // TODO: Migrate to the UUID component
+      if (playerref == null) {
+        return true;
+      }
+
+      return playerContainers.containsKey(playerref.getUuid());
+    });
+    ParticleUtil.spawnParticleEffect("Noobanidus_Lootr_UnopenedChestSparkles", vector3d, objectlist, entityStore);
   }
 
   // This monstrosity allows us to reuse `StashPlugin::stash` without cloning it
