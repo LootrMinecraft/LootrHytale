@@ -216,9 +216,9 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
         }
 
         if (blockEntity != null) {
-          var currentUuid = chunkStore.getComponent(blockEntity, LootrPlugin.getUuidComponentType());
+          var currentUuid = chunkStore.getComponent(blockEntity, UUIDComponent.getComponentType());
           if (currentUuid == null) {
-            chunkStore.putComponent(blockEntity, LootrPlugin.getUuidComponentType(), new UUIDComponent(uuid));
+            chunkStore.putComponent(blockEntity, UUIDComponent.getComponentType(), new UUIDComponent(uuid));
           } else {
             uuid = currentUuid.getUuid();
           }
@@ -348,7 +348,7 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
     }
     // TODO: This initialize will override the capacity of `state`
     newState.setOriginalBlock(originalBlockName);
-    newState.initialize(LootrPlugin.getLootrChestBlockType());
+    newState.initialize(LootrPlugin.get().getLootrChestBlockType());
     newState.droplist = state.getDroplist();
     return newState;
   }

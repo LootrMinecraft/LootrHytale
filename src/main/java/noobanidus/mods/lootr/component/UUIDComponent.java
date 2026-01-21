@@ -28,7 +28,7 @@ public final class UUIDComponent implements Component<ChunkStore> {
 
   @Nonnull
   public static ComponentType<ChunkStore, UUIDComponent> getComponentType() {
-    return LootrPlugin.getUuidComponentType();
+    return LootrPlugin.get().getUuidComponentType();
   }
 
   public UUIDComponent(@Nonnull UUID uuid) {

@@ -29,7 +29,7 @@ public class BlockBreakEventSystem extends EntityEventSystem<EntityStore, BreakB
     if (var5.isCancelled()) {
       return;
     }
-    if (var5.getBlockType().equals(LootrPlugin.getLootrChestBlockType())) {
+    if (var5.getBlockType().equals(LootrPlugin.get().getLootrChestBlockType())) {
       Ref<EntityStore> ref = var2.getReferenceTo(var1);
       Player player = var2.getComponent(var1, Player.getComponentType());
       if (player != null) {

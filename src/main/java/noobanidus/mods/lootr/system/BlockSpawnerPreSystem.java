@@ -45,7 +45,7 @@ public class BlockSpawnerPreSystem extends RefSystem<ChunkStore> {
         if (blockSpawnerId != null) {
           BlockSpawnerTable table = BlockSpawnerTable.getAssetMap().getAsset(blockSpawnerId);
           if (table != null) {
-            LootrPlugin.wrapTable(blockSpawnerId, table);
+            LootrPlugin.get().wrapTable(blockSpawnerId, table);
           }
         }
       }

@@ -32,7 +32,7 @@ public class LootrCommand extends AbstractCommandCollection {
     protected void executeWithBlock(@NonNullDecl CommandContext context, @NonNullDecl WorldChunk chunk, int x, int y, int z) {
       CommandSender commandsender = context.sender();
       BlockType type = chunk.getBlockType(x, y, z);
-      if (type == null || LootrPlugin.getLootrChestBlockType().equals(type)) {
+      if (type == null || LootrPlugin.get().getLootrChestBlockType().equals(type)) {
         return;
       }
       // TODO: Handle combined chests?
@@ -41,7 +41,7 @@ public class LootrCommand extends AbstractCommandCollection {
       if (state instanceof ItemContainerState itemContainerState) {
         var copy = itemContainerState.getItemContainer().clone();
         itemContainerState.getItemContainer().clear();
-        chunk.setBlock(x, y, z, LootrPlugin.getLootrChestBlockType());
+        chunk.setBlock(x, y, z, LootrPlugin.get().getLootrChestBlockType());
         if (chunk.getState(x, y, z) instanceof ItemLootContainerState lootContainerState) {
           lootContainerState.setDroplist(null);
           lootContainerState.setOriginalBlock(type.getId());

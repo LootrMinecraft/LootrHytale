@@ -13,8 +13,10 @@ import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.world.meta.BlockStateModule;
 import com.hypixel.hytale.server.core.universe.world.meta.state.ItemContainerState;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
+import com.hypixel.hytale.server.core.util.Config;
 import noobanidus.mods.lootr.command.LootrCommand;
 import noobanidus.mods.lootr.component.UUIDComponent;
+import noobanidus.mods.lootr.config.LootrConfig;
 import noobanidus.mods.lootr.interaction.OpenLootContainerInteraction;
 import noobanidus.mods.lootr.state.ItemLootContainerState;
 import noobanidus.mods.lootr.system.BlockBreakEventSystem;
@@ -35,15 +37,19 @@ public class LootrPlugin extends JavaPlugin {
   public static final String LOOT_UUID = "Noobanidus_Lootr_LootId";
   public static final String LOOT_CHEST_ID = "Noobanidus_Lootr_LootChest";
   public static final String LOOT_CONTAINER_INTERACTION = "Noobanidus_Lootr_OpenLootContainer";
-  private static ComponentType<ChunkStore, ItemLootContainerState> ITEM_LOOT_CONTAINER_COMPONENT_TYPE = null;
-  private static ComponentType<ChunkStore, UUIDComponent> UUID_COMPONENT_TYPE = null;
-  private static BlockType LOOTR_CHEST_BLOCK_TYPE = null;
-  private static final Set<String> WRAPPED_TABLES = ConcurrentHashMap.newKeySet();
+
+  private ComponentType<ChunkStore, ItemLootContainerState> ITEM_LOOT_CONTAINER_COMPONENT_TYPE = null;
+  private ComponentType<ChunkStore, UUIDComponent> UUID_COMPONENT_TYPE = null;
+  private BlockType LOOTR_CHEST_BLOCK_TYPE = null;
+  private final Set<String> WRAPPED_TABLES = ConcurrentHashMap.newKeySet();
 
   @SuppressWarnings("rawtypes")
   private static BiConsumer<BlockSpawnerTable, IWeightedMap> BLOCK_SPAWNER_ACCESSOR;
 
   public static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+
+  private final Config<LootrConfig> config;
+  private static LootrPlugin instance;
 
   public LootrPlugin(@Nonnull JavaPluginInit init) {
     super(init);
@@ -52,9 +58,15 @@ public class LootrPlugin extends JavaPlugin {
         "entries",
         IWeightedMap.class
     );
+    this.config = this.withConfig("lootr", LootrConfig.CODEC);
+    instance = this;
   }
 
-  public static boolean isWrapped(String blockSpawnerId) {
+  public static LootrPlugin get() {
+    return instance;
+  }
+
+  public boolean isWrapped(String blockSpawnerId) {
     return WRAPPED_TABLES.contains(blockSpawnerId);
   }
 
@@ -71,9 +83,9 @@ public class LootrPlugin extends JavaPlugin {
     this.getCommandRegistry().registerCommand(new LootrCommand());
   }
 
-  private static ComponentType<ChunkStore, ItemContainerState> ITEM_CONTAINER_STATE_COMPONENT_TYPE = null;
+  private ComponentType<ChunkStore, ItemContainerState> ITEM_CONTAINER_STATE_COMPONENT_TYPE = null;
 
-  public static ComponentType<ChunkStore, ItemContainerState> getContainerType() {
+  public ComponentType<ChunkStore, ItemContainerState> getContainerType() {
     if (ITEM_CONTAINER_STATE_COMPONENT_TYPE == null) {
       ITEM_CONTAINER_STATE_COMPONENT_TYPE = BlockStateModule.get()
           .getComponentType(ItemContainerState.class);
@@ -81,25 +93,25 @@ public class LootrPlugin extends JavaPlugin {
     return ITEM_CONTAINER_STATE_COMPONENT_TYPE;
   }
 
-  public static ComponentType<ChunkStore, ItemLootContainerState> getLootContainerType() {
+  public ComponentType<ChunkStore, ItemLootContainerState> getLootContainerType() {
     if (ITEM_LOOT_CONTAINER_COMPONENT_TYPE == null) {
       ITEM_LOOT_CONTAINER_COMPONENT_TYPE = BlockStateModule.get().getComponentType(ItemLootContainerState.class);
     }
     return ITEM_LOOT_CONTAINER_COMPONENT_TYPE;
   }
 
-  public static ComponentType<ChunkStore, UUIDComponent> getUuidComponentType() {
+  public ComponentType<ChunkStore, UUIDComponent> getUuidComponentType() {
     return Objects.requireNonNull(UUID_COMPONENT_TYPE, "UUID Component Type has not been initialized yet");
   }
 
-  public static BlockType getLootrChestBlockType() {
+  public BlockType getLootrChestBlockType() {
     if (LOOTR_CHEST_BLOCK_TYPE == null) {
       LOOTR_CHEST_BLOCK_TYPE = BlockType.getAssetMap().getAsset(LOOT_CHEST_ID);
     }
     return LOOTR_CHEST_BLOCK_TYPE;
   }
 
-  public static boolean canWrap(BlockSpawnerEntry entry) {
+  public boolean canWrap(BlockSpawnerEntry entry) {
     if (entry instanceof TransformedBlockSpawnerEntry) {
       return false;
     }
@@ -120,7 +132,7 @@ public class LootrPlugin extends JavaPlugin {
     return comp.getDroplist() != null;
   }
 
-  public static void wrapTable(String blockStateId, BlockSpawnerTable table) {
+  public void wrapTable(String blockStateId, BlockSpawnerTable table) {
     if (isWrapped(blockStateId)) {
       return;
     }
