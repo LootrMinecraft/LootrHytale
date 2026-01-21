@@ -1,0 +1,5 @@
+lootr.description=Lootr commands: /lootr custom
+lootr.custom.description=Convert a block with an ItemContainer at the specified coordinates into a custom Loot Chest.
+lootr.custom.success=Successfully converted block with ItemContainer at {x}/{y}/{z} into a custom Loot Chest.
+lootr.custom.failure_to_replace=Failed to replace block at {x}/{y}/{z} into a custom Loot Chest.
+lootr.custom.failure_invalid_state=Block '{type}' at {x}/{y}/{z} is is not an ItemContainerState.

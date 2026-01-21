@@ -157,6 +157,10 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
     // NO-OP
   }
 
+  public void setCapacity (short capacity) {
+    this.capacity = capacity;
+  }
+
   @Override
   public void setDroplist(@Nullable String droplist) {
     if (droplist == null && (template == null || template == EmptyItemContainer.INSTANCE)) {
