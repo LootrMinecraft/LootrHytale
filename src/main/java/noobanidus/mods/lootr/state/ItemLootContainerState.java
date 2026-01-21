@@ -197,15 +197,8 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
     }
   }
 
-  @NullableDecl
-  @Override
-  public Component<ChunkStore> clone() {
-    return super.clone();
-  }
-
   @Override
   public void tick(float tick, int index, ArchetypeChunk<ChunkStore> archetype, Store<ChunkStore> store, CommandBuffer<ChunkStore> commandBuffer) {
-
     if (uuid == null) {
       uuid = UUID.randomUUID();
       commandBuffer.run((chunkStore) -> {
@@ -346,7 +339,6 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
     if (newState == null) {
       throw new RuntimeException();
     }
-    // TODO: This initialize will override the capacity of `state`
     newState.setOriginalBlock(originalBlockName);
     newState.initialize(LootrPlugin.get().getLootrChestBlockType());
     newState.droplist = state.getDroplist();
