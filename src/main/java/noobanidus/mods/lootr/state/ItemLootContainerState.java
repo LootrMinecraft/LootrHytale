@@ -60,9 +60,16 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
           state -> state.marker
       )
       .addField(
+          new KeyedCodec<>("Template", ItemContainer.CODEC),
+          (state, o) -> state.template = o,
+          (state) -> state.template
+      )
+      .addField(
           new KeyedCodec<>("PlayerContainers",
               new MapCodec<>(ItemContainer.CODEC, ConcurrentHashMap::new)),
-          (state, o) -> {
+          (state, o) ->
+
+          {
             // TODO: I'm just defaulting to UUID/String conversion because Minecraft generally doesn't support non-String keys when serializing maps.
             ConcurrentHashMap<UUID, ItemContainer> newMap = new ConcurrentHashMap<>();
             for (Map.Entry<String, ItemContainer> entry : o.entrySet()) {
@@ -76,7 +83,9 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
             }
             state.playerContainers = newMap;
           },
-          state -> {
+          state ->
+
+          {
             HashMap<String, ItemContainer> temp = new HashMap<>();
             for (Map.Entry<UUID, ItemContainer> entry : state.playerContainers.entrySet()) {
               temp.put(entry.getKey().toString(), entry.getValue());
@@ -84,16 +93,29 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
             return temp;
           }
       )
-      .build();
+          .
+
+      build();
+
   protected Map<UUID, ItemContainer> playerContainers = new ConcurrentHashMap<>();
   protected short capacity = -1;
   // This is serialized in case we want to de-convert at some point
   protected String originalBlock;
+  protected ItemContainer template;
 
   private UUID uuid = null;
 
   public void setOriginalBlock(String originalBlock) {
     this.originalBlock = originalBlock;
+  }
+
+  public void setTemplate (ItemContainer template) {
+    this.template = template;
+    if (template.getCapacity() < this.capacity) {
+      LootrPlugin.LOGGER.at(Level.WARNING)
+          .log("Template container capacity (%d) is less than loot container capacity (%d). Items may be lost.",
+              template.getCapacity(), this.capacity);
+    }
   }
 
   @Override
@@ -137,8 +159,7 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
 
   @Override
   public void setDroplist(@Nullable String droplist) {
-    // Wiping the droplist means we can never generate loot again, so we don't do it
-    if (droplist == null) {
+    if (droplist == null && (template == null || template == EmptyItemContainer.INSTANCE)) {
       return;
     }
     this.droplist = droplist;
@@ -153,9 +174,14 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
   public ItemContainer getItemContainer(Player playerComponent, UUID player) {
     ItemContainer newContainer = new SimpleItemContainer(this.capacity);
     if ("".equals(droplist) || droplist == null || droplist.isEmpty()) {
-      playerComponent.sendMessage(
-          Message.translation("general.Noobanidus_Lootr.NoDropList").bold(true).color(Color.red)
-      );
+      if (template == null || template == EmptyItemContainer.INSTANCE) {
+        playerComponent.sendMessage(
+            Message.translation("general.Noobanidus_Lootr.NoDropList").bold(true).color(Color.red)
+        );
+        // TODO: Return empty?
+      } else {
+        ItemContainer.copy(template, newContainer, null);
+      }
     }
     if (playerContainers.putIfAbsent(player, newContainer) == null) {
       newContainer.registerChangeEvent(EventPriority.LAST, this::onItemChange);
@@ -194,7 +220,8 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
           }
         } else {
           // Log that we couldn't store the uuid
-          LootrPlugin.LOGGER.at(Level.WARNING).log("Could not store UUID for Lootr chest at %s.", this.getCenteredBlockPosition());
+          LootrPlugin.LOGGER.at(Level.WARNING)
+              .log("Could not store UUID for Lootr chest at %s.", this.getCenteredBlockPosition());
         }
       });
     }
