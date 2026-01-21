@@ -34,14 +34,11 @@ import java.util.function.BiConsumer;
 
 @SuppressWarnings("removal")
 public class LootrPlugin extends JavaPlugin {
+  private static LootrPlugin instance;
+
   public static final String LOOT_UUID = "Noobanidus_Lootr_LootId";
   public static final String LOOT_CHEST_ID = "Noobanidus_Lootr_LootChest";
   public static final String LOOT_CONTAINER_INTERACTION = "Noobanidus_Lootr_OpenLootContainer";
-
-  private ComponentType<ChunkStore, ItemLootContainerState> ITEM_LOOT_CONTAINER_COMPONENT_TYPE = null;
-  private ComponentType<ChunkStore, UUIDComponent> UUID_COMPONENT_TYPE = null;
-  private BlockType LOOTR_CHEST_BLOCK_TYPE = null;
-  private final Set<String> WRAPPED_TABLES = ConcurrentHashMap.newKeySet();
 
   @SuppressWarnings("rawtypes")
   private static BiConsumer<BlockSpawnerTable, IWeightedMap> BLOCK_SPAWNER_ACCESSOR;
@@ -49,7 +46,11 @@ public class LootrPlugin extends JavaPlugin {
   public static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
   private final Config<LootrConfig> config;
-  private static LootrPlugin instance;
+  private ComponentType<ChunkStore, ItemLootContainerState> ITEM_LOOT_CONTAINER_COMPONENT_TYPE = null;
+  private ComponentType<ChunkStore, UUIDComponent> UUID_COMPONENT_TYPE = null;
+  private ComponentType<ChunkStore, ItemContainerState> ITEM_CONTAINER_STATE_COMPONENT_TYPE = null;
+  private BlockType LOOTR_CHEST_BLOCK_TYPE = null;
+  private final Set<String> WRAPPED_TABLES = ConcurrentHashMap.newKeySet();
 
   public LootrPlugin(@Nonnull JavaPluginInit init) {
     super(init);
@@ -66,11 +67,7 @@ public class LootrPlugin extends JavaPlugin {
     return instance;
   }
 
-  public boolean isWrapped(String blockSpawnerId) {
-    return WRAPPED_TABLES.contains(blockSpawnerId);
-  }
-
-  public LootrConfig getConfig () {
+  public LootrConfig getConfig() {
     return this.config.get();
   }
 
@@ -84,11 +81,15 @@ public class LootrPlugin extends JavaPlugin {
     this.getCodecRegistry(Interaction.CODEC)
         .register(LOOT_CONTAINER_INTERACTION, OpenLootContainerInteraction.class, OpenLootContainerInteraction.CODEC);
     this.getEntityStoreRegistry().registerSystem(new BlockBreakEventSystem());
-    UUID_COMPONENT_TYPE = this.getChunkStoreRegistry().registerComponent(UUIDComponent.class, LOOT_UUID, UUIDComponent.CODEC);
+    UUID_COMPONENT_TYPE = this.getChunkStoreRegistry()
+        .registerComponent(UUIDComponent.class, LOOT_UUID, UUIDComponent.CODEC);
     this.getCommandRegistry().registerCommand(new LootrCommand());
   }
 
-  private ComponentType<ChunkStore, ItemContainerState> ITEM_CONTAINER_STATE_COMPONENT_TYPE = null;
+
+  public boolean isWrapped(String blockSpawnerId) {
+    return WRAPPED_TABLES.contains(blockSpawnerId);
+  }
 
   public ComponentType<ChunkStore, ItemContainerState> getContainerType() {
     if (ITEM_CONTAINER_STATE_COMPONENT_TYPE == null) {
