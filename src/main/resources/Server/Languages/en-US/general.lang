@@ -1,3 +1,4 @@
 Noobanidus_Lootr.NoDropList=This chest has no associated droplist and loot cannot be generated for you.
 Noobanidus_Lootr.CrouchToBreak=You must be crouching to break this Loot Chest. Doing so will prevent others from looting it.
 Noobanidus_Lootr.CrouchToBreakCreative=You must be crouching in Creative Mode to break this Loot Chest.
+Noobanidus_Lootr.CannotBreak=You cannot break this Loot Chest.

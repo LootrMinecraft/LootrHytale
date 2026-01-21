@@ -26,7 +26,7 @@ public class BlockBreakEventSystem extends EntityEventSystem<EntityStore, BreakB
 
   @Override
   public void handle(int var1, @NonNullDecl ArchetypeChunk<EntityStore> var2, @NonNullDecl Store<EntityStore> var3, @NonNullDecl CommandBuffer<EntityStore> var4, @NonNullDecl BreakBlockEvent var5) {
-    if (var5.isCancelled()) {
+    if (var5.isCancelled() || LootrPlugin.get().getConfig().isBreakEnabled()) {
       return;
     }
     if (var5.getBlockType().equals(LootrPlugin.get().getLootrChestBlockType())) {
@@ -34,18 +34,36 @@ public class BlockBreakEventSystem extends EntityEventSystem<EntityStore, BreakB
       Player player = var2.getComponent(var1, Player.getComponentType());
       if (player != null) {
         var movement = var4.getComponent(ref, MovementStatesComponent.getComponentType());
-        if (movement != null && !movement.getMovementStates().crouching) {
-          // TODO: Messages send multiple times which is annoying
-          if (player.getGameMode() == GameMode.Creative) {
-            player.sendMessage(
-                Message.translation("general.Noobanidus_Lootr.CrouchToBreakCreative").bold(true).color(Color.red)
-            );
-            var5.setCancelled(true);
+        if (movement != null) {
+          if (!movement.getMovementStates().crouching) {
+            // TODO: Messages send multiple times which is annoying
+            if (player.getGameMode() == GameMode.Creative) {
+              // Not crouching in creative mode
+              player.sendMessage(
+                  Message.translation("general.Noobanidus_Lootr.CrouchToBreakCreative").bold(true).color(Color.red)
+              );
+              var5.setCancelled(true);
+            } else {
+              if (LootrPlugin.get().getConfig().isBreakDisabled()) {
+                player.sendMessage(
+                    Message.translation("general.Noobanidus_Lootr.CannotBreak").bold(true).color(Color.red)
+                );
+              } else {
+                player.sendMessage(
+                    Message.translation("general.Noobanidus_Lootr.CrouchToBreak").bold(true).color(Color.red)
+                );
+              }
+              var5.setCancelled(true);
+            }
           } else {
-            player.sendMessage(
-                Message.translation("general.Noobanidus_Lootr.CrouchToBreak").bold(true).color(Color.red)
-            );
-            var5.setCancelled(true);
+            if (player.getGameMode() != GameMode.Creative) {
+              if (LootrPlugin.get().getConfig().isBreakDisabled()) {
+                player.sendMessage(
+                    Message.translation("general.Noobanidus_Lootr.CannotBreak").bold(true).color(Color.red)
+                );
+                var5.setCancelled(true);
+              }
+            }
           }
         }
       }

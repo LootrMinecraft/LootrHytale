@@ -25,7 +25,8 @@
     },
     "Gathering": {
       "Breaking": {
-        "GatherType": "Woods"
+        "GatherType": "Woods",
+        "Quantity": 0
       }
     },
     "HitboxType": "Full",

@@ -70,9 +70,14 @@ public class LootrPlugin extends JavaPlugin {
     return WRAPPED_TABLES.contains(blockSpawnerId);
   }
 
+  public LootrConfig getConfig () {
+    return this.config.get();
+  }
+
   @Override
   protected void setup() {
     super.setup();
+    this.config.save();
     this.getBlockStateRegistry()
         .registerBlockState(ItemLootContainerState.class, LOOT_CHEST_ID, ItemLootContainerState.CODEC, ItemContainerState.ItemContainerStateData.class, ItemContainerState.ItemContainerStateData.CODEC);
     this.getChunkStoreRegistry().registerSystem(new BlockSpawnerPreSystem());
