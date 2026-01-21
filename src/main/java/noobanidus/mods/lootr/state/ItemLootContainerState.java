@@ -258,7 +258,7 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
 
       return playerContainers.containsKey(playerref.getUuid());
     });
-    ParticleUtil.spawnParticleEffect("Noobanidus_Lootr_UnopenedChestSparkles", vector3d, objectlist, entityStore);
+    ParticleUtil.spawnParticleEffect("Noobanidus_Lootr_UnopenedChestSparkles", vector3d.x, vector3d.y, vector3d.z, 0f, 0f, 0f, 1f, new com.hypixel.hytale.protocol.Color((byte)240, (byte)203, (byte)86), null, objectlist, entityStore);
   }
 
   // This monstrosity allows us to reuse `StashPlugin::stash` without cloning it

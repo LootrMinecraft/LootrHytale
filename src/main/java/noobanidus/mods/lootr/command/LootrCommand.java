@@ -36,6 +36,7 @@ public class LootrCommand extends AbstractCommandCollection {
         return;
       }
       // TODO: Handle combined chests?
+      // TODO: Handle rotation?
       BlockState state = chunk.getState(x, y, z);
       if (state instanceof ItemContainerState itemContainerState) {
         var copy = itemContainerState.getItemContainer().clone();

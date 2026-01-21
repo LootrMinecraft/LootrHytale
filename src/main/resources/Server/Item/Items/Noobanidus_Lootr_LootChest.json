@@ -8,14 +8,14 @@
     "Furniture.Containers"
   ],
   "Set": "Furniture_Adventure",
-  "Icon": "Icons/ItemsGenerated/Furniture_Dungeon_Chest_Epic.png",
+  "Icon": "Icons/ItemsGenerated/Noobanidus_Lootr_LootChest.png",
   "BlockType": {
     "BlockParticleSetId": "Wood",
     "BlockSoundSetId": "Wood",
-    "CustomModel": "Blocks/Lootr/Noobanidus_Lootr_LootChest.blockymodel",
+    "CustomModel": "Blocks/Dungeons/Chest_Epic_Small.blockymodel",
     "CustomModelTexture": [
       {
-        "Texture": "Blocks/Lootr/Noobanidus_Lootr_LootChest.png",
+        "Texture": "Blocks/Lootr/Chest_Epic_Small_Texture.png",
         "Weight": 1
       }
     ],
