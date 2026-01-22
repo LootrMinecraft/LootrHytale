@@ -32,7 +32,7 @@ public class LootrCommand extends AbstractCommandCollection {
     protected void executeWithBlock(@NonNullDecl CommandContext context, @NonNullDecl WorldChunk chunk, int x, int y, int z) {
       CommandSender commandsender = context.sender();
       BlockType type = chunk.getBlockType(x, y, z);
-      if (type == null || LootrPlugin.get().getLootrChestBlockType().equals(type)) {
+      if (type == null || type.getId().equals(LootrPlugin.LOOT_CHEST_ID)) {
         return;
       }
       // TODO: Handle combined chests?
