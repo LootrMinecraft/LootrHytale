@@ -3,7 +3,7 @@
     {
       "id": "1",
       "name": "R-Attachment",
-      "position": {"x": 1, "y": 0, "z": -7.25},
+      "position": {"x": 0, "y": 0, "z": -6.25},
       "orientation": {"x": 0, "y": 0, "z": 0, "w": 1},
       "shape": {
         "type": "none",
@@ -1211,8 +1211,8 @@
                               },
                               "top": {
                                 "offset": {"x": 74, "y": 114},
-                                "mirror": {"x": true, "y": true},
-                                "angle": 270
+                                "mirror": {"x": false, "y": false},
+                                "angle": 90
                               }
                             },
                             "unwrapMode": "custom",
