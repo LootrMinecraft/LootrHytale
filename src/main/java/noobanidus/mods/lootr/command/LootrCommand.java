@@ -41,7 +41,8 @@ public class LootrCommand extends AbstractCommandCollection {
       if (state instanceof ItemContainerState itemContainerState) {
         var copy = itemContainerState.getItemContainer().clone();
         itemContainerState.getItemContainer().clear();
-        chunk.setBlock(x, y, z, LootrPlugin.get().getLootrChestBlockType());
+        var rotation = chunk.getRotationIndex(x, y, z);
+        chunk.setBlock(x, y, z, BlockType.getAssetMap().getIndex(LootrPlugin.LOOT_CHEST_ID), LootrPlugin.get().getLootrChestBlockType(), rotation, 0, 0);
         if (chunk.getState(x, y, z) instanceof ItemLootContainerState lootContainerState) {
           lootContainerState.setDroplist(null);
           lootContainerState.setOriginalBlock(type.getId());
