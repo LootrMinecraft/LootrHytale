@@ -12,10 +12,10 @@
   "BlockType": {
     "BlockParticleSetId": "Wood",
     "BlockSoundSetId": "Wood",
-    "CustomModel": "Blocks/Dungeons/Chest_Epic_Small.blockymodel",
+    "CustomModel": "Blocks/Lootr/Noobanidus_Lootr_LootChest.blockymodel",
     "CustomModelTexture": [
       {
-        "Texture": "Blocks/Lootr/Chest_Epic_Small_Texture.png",
+        "Texture": "Blocks/Lootr/Noobanidus_Lootr_LootChest_Texture.png",
         "Weight": 1
       }
     ],
