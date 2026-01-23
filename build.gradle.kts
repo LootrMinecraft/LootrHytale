@@ -1,7 +1,10 @@
+import fr.smolder.hytale.gradle.Patchline
+import org.gradle.external.javadoc.StandardJavadocDocletOptions
+
 plugins {
-    id 'java'
-    id 'org.jetbrains.gradle.plugin.idea-ext' version '1.3'
-    id 'fr.smolder.hytale.dev' version "0.0.9"
+    java
+    id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"
+    id("fr.smolder.hytale.dev") version "0.1.0"
 }
 
 repositories {
@@ -9,14 +12,14 @@ repositories {
 }
 
 hytale {
-    patchLine.set("release")
+    patchLine.set(Patchline.PRE_RELEASE)
     gameVersion.set("latest")
     autoUpdateManifest.set(true)
     minMemory.set("2G")
     maxMemory.set("4G")
     useAotCache.set(true)
     vineflowerVersion.set("1.11.2")
-    decompileFilter.set(["com/hypixel/**"])
+    decompileFilter.set(listOf("com/hypixel/**"))
     decompilerHeapSize.set("6G")
     includeDecompiledSources.set(true)
 
@@ -33,11 +36,8 @@ hytale {
         }
 
         website = "https://noobanidus.com"
-
         serverVersion = "*"
-
         main = "noobanidus.mods.lootr.LootrPlugin"
-
         includesAssetPack = true
         disabledByDefault = false
 
@@ -47,21 +47,19 @@ hytale {
 }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+    toolchain.languageVersion.set(JavaLanguageVersion.of(25))
     withSourcesJar()
     withJavadocJar()
 }
 
-// Quiet warnings about missing Javadocs.
-javadoc {
-    options.addStringOption('Xdoclint:-missing', '-quiet')
+tasks.javadoc {
+    (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:-missing", "-quiet")
 }
 
-// Makes sure the plugin manifest is up to date.
-tasks.named('processResources') {
-    dependsOn 'updatePluginManifest'
+tasks.named<ProcessResources>("processResources") {
+    dependsOn("updatePluginManifest")
 }
 
-tasks.named("sourcesJar") {
-    dependsOn "generateManifest"
+tasks.named<Jar>("sourcesJar") {
+    dependsOn("generateManifest")
 }
