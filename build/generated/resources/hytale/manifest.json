@@ -1,0 +1,25 @@
+{
+    "Group": "Lootr",
+    "Name": "Lootr",
+    "Version": "0.0.3",
+    "Description": "Server-friendly loot for everyone!",
+    "Authors": [
+        {
+            "Name": "Noobanidus",
+            "Email": "noobanidus@gmail.com",
+            "Url": "https://noobanidus.com"
+        }
+    ],
+    "ServerVersion": "*",
+    "Website": "https://noobanidus.com",
+    "Dependencies": {
+        "Hytale:BlockStateModule": "*",
+        "Hytale:BlockModule": "*"
+    },
+    "OptionalDependencies": {
+        
+    },
+    "DisabledByDefault": false,
+    "Main": "noobanidus.mods.lootr.LootrPlugin",
+    "IncludesAssetPack": true
+}
