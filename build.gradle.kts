@@ -43,6 +43,7 @@ hytale {
 
         dependency("Hytale:BlockStateModule", "*")
         dependency("Hytale:BlockModule", "*")
+        dependency("Hytale:EntityModule", "*")
     }
 }
 
