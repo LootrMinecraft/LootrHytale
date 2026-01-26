@@ -1,7 +1,7 @@
 {
     "Group": "Lootr",
     "Name": "Lootr",
-    "Version": "0.0.3",
+    "Version": "0.0.4",
     "Description": "Server-friendly loot for everyone!",
     "Authors": [
         {
@@ -14,7 +14,8 @@
     "Website": "https://noobanidus.com",
     "Dependencies": {
         "Hytale:BlockStateModule": "*",
-        "Hytale:BlockModule": "*"
+        "Hytale:BlockModule": "*",
+        "Hytale:EntityModule": "*"
     },
     "OptionalDependencies": {
         
