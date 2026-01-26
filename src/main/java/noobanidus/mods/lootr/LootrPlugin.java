@@ -7,6 +7,7 @@ import com.hypixel.hytale.common.map.WeightedMap;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
@@ -135,7 +136,8 @@ public class LootrPlugin extends JavaPlugin {
     if (comp.getDroplist() == null) {
       return false;
     }
-    if (!LootrPlugin.get().getConfig().canBeConverted(comp)) {
+    var blockType = BlockType.getAssetMap().getAsset(entry.getBlockName());
+    if (blockType == null || !LootrPlugin.get().getConfig().canBeConverted(blockType.getState())) {
       return false;
     }
     return comp.getDroplist() != null;

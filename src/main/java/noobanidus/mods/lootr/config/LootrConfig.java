@@ -2,10 +2,14 @@ package noobanidus.mods.lootr.config;
 
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.component.Component;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.StateData;
 import com.hypixel.hytale.server.core.command.commands.player.inventory.ItemStateCommand;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
+import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.universe.world.meta.state.ItemContainerState;
 
+@SuppressWarnings("removal")
 public class LootrConfig {
   public static final BuilderCodec<LootrConfig> CODEC = BuilderCodec.builder(LootrConfig.class, LootrConfig::new)
       .append(
@@ -48,10 +52,14 @@ public class LootrConfig {
   }
 
   public boolean canBeConverted (ItemContainerState state) {
-    return canBeConverted(state.getItemContainer());
+    return canBeConverted(state.getBlockType().getState());
   }
 
-  public boolean canBeConverted (ItemContainer container) {
-    return container.getCapacity() >= this.minimumCapacity;
+  public boolean canBeConverted (StateData data) {
+    if (data instanceof ItemContainerState.ItemContainerStateData stateData) {
+      return stateData.getCapacity() >= this.minimumCapacity;
+    }
+
+    return false;
   }
 }
