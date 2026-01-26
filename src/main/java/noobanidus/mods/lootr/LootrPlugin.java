@@ -135,6 +135,9 @@ public class LootrPlugin extends JavaPlugin {
     if (comp.getDroplist() == null) {
       return false;
     }
+    if (!LootrPlugin.get().getConfig().canBeConverted(comp)) {
+      return false;
+    }
     return comp.getDroplist() != null;
   }
 
