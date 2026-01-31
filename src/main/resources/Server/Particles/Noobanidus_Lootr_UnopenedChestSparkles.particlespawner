@@ -28,7 +28,6 @@
   "Attractors": [
   ],
   "Particle": {
-    "Color": "#f8cb56",
     "Texture": "Particles/Textures/Basic/Spark2.png",
     "FrameSize": { "Width": 32, "Height": 32 },
     "ScaleRatioConstraint": "OneToOne",

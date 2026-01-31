@@ -54,11 +54,11 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
       .addField(new KeyedCodec<>("AllowViewing", Codec.BOOLEAN), (state, o) -> state.allowViewing = o, state -> state.allowViewing)
       .addField(new KeyedCodec<>("Droplist", Codec.STRING), (state, o) -> state.droplist = o, state -> state.droplist)
       .addField(new KeyedCodec<>("OriginalBlock", Codec.STRING), (state, o) -> state.originalBlock = o, state -> state.originalBlock)
-      .addField(
+/*      .addField(
           new KeyedCodec<>("Marker", WorldMapManager.MarkerReference.CODEC),
           (state, o) -> state.marker = o,
           state -> state.marker
-      )
+      )*/
       .addField(
           new KeyedCodec<>("Template", ItemContainer.CODEC),
           (state, o) -> state.template = o,
@@ -147,9 +147,9 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
     WindowManager.closeAndRemoveAll(this.getWindows());
     // We don't drop any contents as that would be confusing
 
-    if (this.marker != null) {
+/*    if (this.marker != null) {
       this.marker.remove();
-    }
+    }*/
   }
 
   @Override
