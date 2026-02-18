@@ -36,7 +36,7 @@ hytale {
         }
 
         website = "https://noobanidus.com"
-        serverVersion = "*"
+        serverVersion = properties.server_version.toString()
         main = "noobanidus.mods.lootr.LootrPlugin"
         includesAssetPack = true
         disabledByDefault = false
