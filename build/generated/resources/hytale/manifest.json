@@ -10,7 +10,7 @@
             "Url": "https://noobanidus.com"
         }
     ],
-    "ServerVersion": "2026.02.17-255364b8e",
+    "ServerVersion": "2026.02.11-255364b8e",
     "Website": "https://noobanidus.com",
     "Dependencies": {
         "Hytale:BlockStateModule": "*",
