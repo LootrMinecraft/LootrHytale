@@ -33,10 +33,18 @@ public class LootrConfig {
       )
       .documentation("The minimum capacity an ItemContainerState must have to be converted. [default: 2]")
       .add()
+      .append(
+          new KeyedCodec<>("Disable_Conversion", BuilderCodec.BOOLEAN),
+          (config, o) -> config.disableConversion = o,
+          (config) -> config.disableConversion
+      )
+      .documentation("If true, conversion will not take place. [default: false]")
+      .add()
       .build();
 
   private boolean enableBreak = false;
   private boolean disableBreak = false;
+  private boolean disableConversion = false;
   private int minimumCapacity = 2;
 
   public boolean isBreakEnabled () {
@@ -56,10 +64,18 @@ public class LootrConfig {
   }
 
   public boolean canBeConverted (StateData data) {
+    if (isConversionDisabled()) {
+      return false;
+    }
+
     if (data instanceof ItemContainerState.ItemContainerStateData stateData) {
       return stateData.getCapacity() >= this.minimumCapacity;
     }
 
     return false;
+  }
+
+  public boolean isConversionDisabled() {
+    return disableConversion;
   }
 }

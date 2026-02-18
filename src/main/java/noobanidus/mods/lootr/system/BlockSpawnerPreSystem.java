@@ -35,6 +35,9 @@ public class BlockSpawnerPreSystem extends RefSystem<ChunkStore> {
 
   @Override
   public void onEntityAdded(@Nonnull Ref<ChunkStore> ref, @Nonnull AddReason reason, @Nonnull Store<ChunkStore> store, @Nonnull CommandBuffer<ChunkStore> commandBuffer) {
+    if (LootrPlugin.get().getConfig().isConversionDisabled()) {
+      return;
+    }
     WorldConfig worldConfig = store.getExternalData().getWorld().getWorldConfig();
     if (worldConfig.getGameMode() != GameMode.Creative) {
       BlockSpawner state = commandBuffer.getComponent(ref, BlockSpawner.getComponentType());
