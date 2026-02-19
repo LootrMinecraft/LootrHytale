@@ -12,7 +12,7 @@ repositories {
 }
 
 hytale {
-    patchLine.set(Patchline.PRE_RELEASE)
+    patchLine.set(Patchline.RELEASE)
     gameVersion.set("latest")
     autoUpdateManifest.set(true)
     minMemory.set("2G")
