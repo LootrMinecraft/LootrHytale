@@ -6,7 +6,6 @@ import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.map.MapCodec;
 import com.hypixel.hytale.component.*;
-import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.spatial.SpatialResource;
 import com.hypixel.hytale.event.EventPriority;
 import com.hypixel.hytale.math.vector.Vector3d;
@@ -27,7 +26,6 @@ import com.hypixel.hytale.server.core.universe.world.chunk.state.TickableBlockSt
 import com.hypixel.hytale.server.core.universe.world.meta.state.ItemContainerState;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.hypixel.hytale.server.core.universe.world.worldmap.WorldMapManager;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import noobanidus.mods.lootr.LootrPlugin;
 import noobanidus.mods.lootr.component.UUIDComponent;
@@ -54,11 +52,6 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
       .addField(new KeyedCodec<>("AllowViewing", Codec.BOOLEAN), (state, o) -> state.allowViewing = o, state -> state.allowViewing)
       .addField(new KeyedCodec<>("Droplist", Codec.STRING), (state, o) -> state.droplist = o, state -> state.droplist)
       .addField(new KeyedCodec<>("OriginalBlock", Codec.STRING), (state, o) -> state.originalBlock = o, state -> state.originalBlock)
-/*      .addField(
-          new KeyedCodec<>("Marker", WorldMapManager.MarkerReference.CODEC),
-          (state, o) -> state.marker = o,
-          state -> state.marker
-      )*/
       .addField(
           new KeyedCodec<>("Template", ItemContainer.CODEC),
           (state, o) -> state.template = o,
@@ -93,9 +86,7 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
             return temp;
           }
       )
-          .
-
-      build();
+      .build();
 
   protected Map<UUID, ItemContainer> playerContainers = new ConcurrentHashMap<>();
   protected short capacity = -1;
@@ -109,7 +100,7 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
     this.originalBlock = originalBlock;
   }
 
-  public void setTemplate (ItemContainer template) {
+  public void setTemplate(ItemContainer template) {
     this.template = template;
     if (template.getCapacity() < this.capacity) {
       LootrPlugin.LOGGER.at(Level.WARNING)
@@ -145,11 +136,6 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
   @Override
   public void onDestroy() {
     WindowManager.closeAndRemoveAll(this.getWindows());
-    // We don't drop any contents as that would be confusing
-
-/*    if (this.marker != null) {
-      this.marker.remove();
-    }*/
   }
 
   @Override
@@ -157,7 +143,7 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
     // NO-OP
   }
 
-  public void setCapacity (short capacity) {
+  public void setCapacity(short capacity) {
     this.capacity = capacity;
   }
 
@@ -251,7 +237,7 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
 
       return playerContainers.containsKey(playerref.getUuid());
     });
-    ParticleUtil.spawnParticleEffect("Noobanidus_Lootr_UnopenedChestSparkles", vector3d.x, vector3d.y, vector3d.z, 0f, 0f, 0f, 1f, new com.hypixel.hytale.protocol.Color((byte)240, (byte)203, (byte)86), null, objectlist, entityStore);
+    ParticleUtil.spawnParticleEffect("Noobanidus_Lootr_UnopenedChestSparkles", vector3d.x, vector3d.y, vector3d.z, 0f, 0f, 0f, 1f, new com.hypixel.hytale.protocol.Color((byte) 240, (byte) 203, (byte) 86), null, objectlist, entityStore);
   }
 
   // This monstrosity allows us to reuse `StashPlugin::stash` without cloning it

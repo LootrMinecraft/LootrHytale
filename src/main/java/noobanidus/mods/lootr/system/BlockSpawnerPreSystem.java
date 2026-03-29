@@ -20,17 +20,9 @@ import javax.annotation.Nonnull;
 import java.util.Set;
 
 public class BlockSpawnerPreSystem extends RefSystem<ChunkStore> {
-  private final Set<Dependency<ChunkStore>> dependencies;
+  private Set<Dependency<ChunkStore>> dependencies = null;
 
   public BlockSpawnerPreSystem() {
-    Class<RefSystem<ChunkStore>> cls;
-    try {
-      //noinspection unchecked
-      cls = (Class<RefSystem<ChunkStore>>) Class.forName("com.hypixel.hytale.builtin.blockspawner.BlockSpawnerPlugin$BlockSpawnerSystem");
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
-    }
-    this.dependencies = Set.of(new SystemDependency<>(Order.BEFORE, cls));
   }
 
   @Override
@@ -69,6 +61,16 @@ public class BlockSpawnerPreSystem extends RefSystem<ChunkStore> {
   @NonNullDecl
   @Override
   public Set<Dependency<ChunkStore>> getDependencies() {
+    if (this.dependencies == null) {
+      Class<RefSystem<ChunkStore>> cls;
+      try {
+        //noinspection unchecked
+        cls = (Class<RefSystem<ChunkStore>>) Class.forName("com.hypixel.hytale.builtin.blockspawner.BlockSpawnerPlugin$BlockSpawnerSystem");
+      } catch (ClassNotFoundException e) {
+        throw new RuntimeException(e);
+      }
+      this.dependencies = Set.of(new SystemDependency<>(Order.BEFORE, cls));
+    }
     return dependencies;
   }
 }
