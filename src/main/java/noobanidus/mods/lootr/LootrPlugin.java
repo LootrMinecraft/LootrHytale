@@ -7,7 +7,6 @@ import com.hypixel.hytale.common.map.WeightedMap;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
-import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
@@ -19,7 +18,7 @@ import noobanidus.mods.lootr.command.LootrCommand;
 import noobanidus.mods.lootr.component.UUIDComponent;
 import noobanidus.mods.lootr.config.LootrConfig;
 import noobanidus.mods.lootr.interaction.OpenLootContainerInteraction;
-import noobanidus.mods.lootr.state.ItemLootContainerState;
+import noobanidus.mods.lootr.state.ItemLootContainerBlock;
 import noobanidus.mods.lootr.system.BlockBreakEventSystem;
 import noobanidus.mods.lootr.system.BlockSpawnerPreSystem;
 import noobanidus.mods.lootr.util.ReflectionHelper;
@@ -47,7 +46,7 @@ public class LootrPlugin extends JavaPlugin {
   public static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
   private final Config<LootrConfig> config;
-  private ComponentType<ChunkStore, ItemLootContainerState> ITEM_LOOT_CONTAINER_COMPONENT_TYPE = null;
+  private ComponentType<ChunkStore, ItemLootContainerBlock> ITEM_LOOT_CONTAINER_COMPONENT_TYPE = null;
   private ComponentType<ChunkStore, UUIDComponent> UUID_COMPONENT_TYPE = null;
   private ComponentType<ChunkStore, ItemContainerState> ITEM_CONTAINER_STATE_COMPONENT_TYPE = null;
   private BlockType LOOTR_CHEST_BLOCK_TYPE = null;
@@ -77,7 +76,7 @@ public class LootrPlugin extends JavaPlugin {
     super.setup();
     this.config.save();
     this.getBlockStateRegistry()
-        .registerBlockState(ItemLootContainerState.class, LOOT_CHEST_ID, ItemLootContainerState.CODEC, ItemContainerState.ItemContainerStateData.class, ItemContainerState.ItemContainerStateData.CODEC);
+        .registerBlockState(ItemLootContainerBlock.class, LOOT_CHEST_ID, ItemLootContainerBlock.CODEC, ItemContainerState.ItemContainerStateData.class, ItemContainerState.ItemContainerStateData.CODEC);
     this.getChunkStoreRegistry().registerSystem(new BlockSpawnerPreSystem());
     this.getCodecRegistry(Interaction.CODEC)
         .register(LOOT_CONTAINER_INTERACTION, OpenLootContainerInteraction.class, OpenLootContainerInteraction.CODEC);
@@ -100,9 +99,9 @@ public class LootrPlugin extends JavaPlugin {
     return ITEM_CONTAINER_STATE_COMPONENT_TYPE;
   }
 
-  public ComponentType<ChunkStore, ItemLootContainerState> getLootContainerType() {
+  public ComponentType<ChunkStore, ItemLootContainerBlock> getLootContainerType() {
     if (ITEM_LOOT_CONTAINER_COMPONENT_TYPE == null) {
-      ITEM_LOOT_CONTAINER_COMPONENT_TYPE = BlockStateModule.get().getComponentType(ItemLootContainerState.class);
+      ITEM_LOOT_CONTAINER_COMPONENT_TYPE = BlockStateModule.get().getComponentType(ItemLootContainerBlock.class);
     }
     return ITEM_LOOT_CONTAINER_COMPONENT_TYPE;
   }
@@ -153,7 +152,7 @@ public class LootrPlugin extends JavaPlugin {
         var comp = entry.getBlockComponents().clone();
         var state = comp.getComponent(getContainerType());
         comp.removeComponent(getContainerType());
-        comp.addComponent(getLootContainerType(), ItemLootContainerState.fromContainerState(entry.getBlockName(), state));
+        comp.addComponent(getLootContainerType(), ItemLootContainerBlock.fromContainerState(entry.getBlockName(), state));
         entries.add(new TransformedBlockSpawnerEntry(entry, LootrPlugin.LOOT_CHEST_ID, comp));
       } else {
         entries.add(entry);

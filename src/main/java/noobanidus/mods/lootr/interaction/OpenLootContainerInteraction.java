@@ -23,7 +23,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.meta.BlockState;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import noobanidus.mods.lootr.state.ItemLootContainerState;
+import noobanidus.mods.lootr.state.ItemLootContainerBlock;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -54,7 +54,7 @@ public class OpenLootContainerInteraction extends SimpleBlockInteraction {
     Player playerComponent = commandBuffer.getComponent(ref, Player.getComponentType());
     if (playerComponent != null) {
       BlockState container = world.getState(pos.x, pos.y, pos.z, true);
-      if (container instanceof ItemLootContainerState itemContainerState) {
+      if (container instanceof ItemLootContainerBlock itemContainerState) {
         BlockType blockType = world.getBlockType(pos.x, pos.y, pos.z);
         if (itemContainerState.isAllowViewing() && itemContainerState.canOpen(ref, commandBuffer)) {
           UUIDComponent uuidComponent = commandBuffer.getComponent(ref, UUIDComponent.getComponentType());

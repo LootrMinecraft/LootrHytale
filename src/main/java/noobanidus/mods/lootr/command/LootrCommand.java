@@ -11,7 +11,7 @@ import com.hypixel.hytale.server.core.universe.world.commands.block.SimpleBlockC
 import com.hypixel.hytale.server.core.universe.world.meta.BlockState;
 import com.hypixel.hytale.server.core.universe.world.meta.state.ItemContainerState;
 import noobanidus.mods.lootr.LootrPlugin;
-import noobanidus.mods.lootr.state.ItemLootContainerState;
+import noobanidus.mods.lootr.state.ItemLootContainerBlock;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 public class LootrCommand extends AbstractCommandCollection {
@@ -43,7 +43,7 @@ public class LootrCommand extends AbstractCommandCollection {
         itemContainerState.getItemContainer().clear();
         var rotation = chunk.getRotationIndex(x, y, z);
         chunk.setBlock(x, y, z, BlockType.getAssetMap().getIndex(LootrPlugin.LOOT_CHEST_ID), LootrPlugin.get().getLootrChestBlockType(), rotation, 0, 0);
-        if (chunk.getState(x, y, z) instanceof ItemLootContainerState lootContainerState) {
+        if (chunk.getState(x, y, z) instanceof ItemLootContainerBlock lootContainerState) {
           lootContainerState.setDroplist(null);
           lootContainerState.setOriginalBlock(type.getId());
           lootContainerState.setTemplate(copy);

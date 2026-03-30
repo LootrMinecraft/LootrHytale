@@ -17,7 +17,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import noobanidus.mods.lootr.LootrPlugin;
-import noobanidus.mods.lootr.state.ItemLootContainerState;
+import noobanidus.mods.lootr.state.ItemLootContainerBlock;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
@@ -38,7 +38,7 @@ public class BlockBreakEventSystem extends EntityEventSystem<EntityStore, BreakB
     World world = commandBuffer.getExternalData().getWorld();
     long i = ChunkUtil.indexChunkFromBlock(vector3i.x, vector3i.z);
     WorldChunk worldchunk = world.getChunkIfLoaded(i);
-    if (worldchunk != null && !(worldchunk.getState(vector3i.x, vector3i.y, vector3i.z) instanceof ItemLootContainerState)) {
+    if (worldchunk != null && !(worldchunk.getState(vector3i.x, vector3i.y, vector3i.z) instanceof ItemLootContainerBlock)) {
       return;
     }
 

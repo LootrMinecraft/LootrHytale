@@ -5,6 +5,7 @@ import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.map.MapCodec;
+import com.hypixel.hytale.common.thread.ticking.Tickable;
 import com.hypixel.hytale.component.*;
 import com.hypixel.hytale.component.spatial.SpatialResource;
 import com.hypixel.hytale.event.EventPriority;
@@ -18,17 +19,17 @@ import com.hypixel.hytale.server.core.inventory.container.EmptyItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer;
 import com.hypixel.hytale.server.core.modules.block.BlockModule;
+import com.hypixel.hytale.server.core.modules.block.components.ItemContainerBlock;
 import com.hypixel.hytale.server.core.modules.entity.EntityModule;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.ParticleUtil;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
-import com.hypixel.hytale.server.core.universe.world.chunk.state.TickableBlockState;
-import com.hypixel.hytale.server.core.universe.world.meta.state.ItemContainerState;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import noobanidus.mods.lootr.LootrPlugin;
 import noobanidus.mods.lootr.component.UUIDComponent;
+import noobanidus.mods.lootr.container.EmptySimpleItemContainer;
 import org.bson.BsonDocument;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
@@ -36,6 +37,9 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.*;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -43,17 +47,27 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 @SuppressWarnings({"removal", "deprecation"})
-public class ItemLootContainerState extends ItemContainerState implements TickableBlockState {
-  public static final Codec<ItemLootContainerState> CODEC = BuilderCodec.builder(
-          ItemLootContainerState.class, ItemLootContainerState::new, ItemContainerState.BASE_CODEC
+public class ItemLootContainerBlock extends ItemContainerBlock {
+  private static final ItemContainerBlock EMPTY;
+
+  static {
+    try {
+      MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(ItemContainerBlock.class, MethodHandles.lookup());
+      MethodHandle ctor = lookup.findConstructor(ItemContainerBlock.class, MethodType.methodType(void.class));
+      EMPTY = (ItemContainerBlock) ctor.invoke();
+    } catch (Throwable e) {
+      throw new ExceptionInInitializerError(e);
+    }
+  }
+
+  public static final Codec<ItemLootContainerBlock> CODEC = BuilderCodec.builder(
+          ItemLootContainerBlock.class, ItemLootContainerBlock::new, ItemContainerBlock.CODEC
       )
       .addField(new KeyedCodec<>("Capacity", Codec.SHORT), (state, o) -> state.capacity = o, (state) -> state.capacity)
-      .addField(new KeyedCodec<>("Custom", Codec.BOOLEAN), (state, o) -> state.custom = o, state -> state.custom)
-      .addField(new KeyedCodec<>("AllowViewing", Codec.BOOLEAN), (state, o) -> state.allowViewing = o, state -> state.allowViewing)
       .addField(new KeyedCodec<>("Droplist", Codec.STRING), (state, o) -> state.droplist = o, state -> state.droplist)
       .addField(new KeyedCodec<>("OriginalBlock", Codec.STRING), (state, o) -> state.originalBlock = o, state -> state.originalBlock)
       .addField(
-          new KeyedCodec<>("Template", ItemContainer.CODEC),
+          new KeyedCodec<>("Template", SimpleItemContainer.CODEC),
           (state, o) -> state.template = o,
           (state) -> state.template
       )
@@ -64,8 +78,8 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
 
           {
             // TODO: I'm just defaulting to UUID/String conversion because Minecraft generally doesn't support non-String keys when serializing maps.
-            ConcurrentHashMap<UUID, ItemContainer> newMap = new ConcurrentHashMap<>();
-            for (Map.Entry<String, ItemContainer> entry : o.entrySet()) {
+            ConcurrentHashMap<UUID, SimpleItemContainer> newMap = new ConcurrentHashMap<>();
+            for (Map.Entry<String, SimpleItemContainer> entry : o.entrySet()) {
               try {
                 UUID uuid = UUID.fromString(entry.getKey());
                 newMap.put(uuid, entry.getValue());
@@ -79,8 +93,8 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
           state ->
 
           {
-            HashMap<String, ItemContainer> temp = new HashMap<>();
-            for (Map.Entry<UUID, ItemContainer> entry : state.playerContainers.entrySet()) {
+            HashMap<String, SimpleItemContainer> temp = new HashMap<>();
+            for (Map.Entry<UUID, SimpleItemContainer> entry : state.playerContainers.entrySet()) {
               temp.put(entry.getKey().toString(), entry.getValue());
             }
             return temp;
@@ -88,19 +102,31 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
       )
       .build();
 
-  protected Map<UUID, ItemContainer> playerContainers = new ConcurrentHashMap<>();
+  protected Map<UUID, SimpleItemContainer> playerContainers = new ConcurrentHashMap<>();
   protected short capacity = -1;
   // This is serialized in case we want to de-convert at some point
   protected String originalBlock;
-  protected ItemContainer template;
+  protected SimpleItemContainer template;
 
   private UUID uuid = null;
+
+  public ItemLootContainerBlock () {
+    super(EMPTY);
+  }
+
+  public ItemLootContainerBlock (ItemLootContainerBlock other) {
+    super(other);
+    this.originalBlock = other.originalBlock;
+    this.template = other.template == null ? null : other.template.clone();
+    this.uuid = other.uuid == null ? null : other.uuid;
+
+  }
 
   public void setOriginalBlock(String originalBlock) {
     this.originalBlock = originalBlock;
   }
 
-  public void setTemplate(ItemContainer template) {
+  public void setTemplate(SimpleItemContainer template) {
     this.template = template;
     if (template.getCapacity() < this.capacity) {
       LootrPlugin.LOGGER.at(Level.WARNING)
@@ -109,7 +135,7 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
     }
   }
 
-  @Override
+/*  @Override
   public boolean initialize(@Nonnull BlockType blockType) {
     var oldCustom = this.custom;
     this.custom = true;
@@ -131,12 +157,14 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
     }
 
     return true;
-  }
+  }*/
 
+/*
   @Override
   public void onDestroy() {
     WindowManager.closeAndRemoveAll(this.getWindows());
   }
+*/
 
   @Override
   public void setItemContainer(SimpleItemContainer itemContainer) {
@@ -153,18 +181,17 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
       return;
     }
     this.droplist = droplist;
-    this.markNeedsSave();
   }
 
   @Override
-  public ItemContainer getItemContainer() {
-    return EmptyItemContainer.INSTANCE;
+  public SimpleItemContainer getItemContainer() {
+    return EmptySimpleItemContainer.INSTANCE;
   }
 
-  public ItemContainer getItemContainer(Player playerComponent, UUID player) {
-    ItemContainer newContainer = new SimpleItemContainer(this.capacity);
+  public SimpleItemContainer getItemContainer(Player playerComponent, UUID player) {
+    SimpleItemContainer newContainer = new SimpleItemContainer(this.capacity);
     if ("".equals(droplist) || droplist == null || droplist.isEmpty()) {
-      if (template == null || template == EmptyItemContainer.INSTANCE) {
+      if (template == null || template == EmptySimpleItemContainer.INSTANCE) {
         playerComponent.sendMessage(
             Message.translation("general.Noobanidus_Lootr.NoDropList").bold(true).color(Color.red)
         );
@@ -257,67 +284,67 @@ public class ItemLootContainerState extends ItemContainerState implements Tickab
     @NullableDecl
     @Override
     public String getDroplist() {
-      return ItemLootContainerState.this.getDroplist();
+      return ItemLootContainerBlock.this.getDroplist();
     }
 
     @Override
     public void setDroplist(@NullableDecl String droplist) {
-      ItemLootContainerState.this.setDroplist(droplist);
+      ItemLootContainerBlock.this.setDroplist(droplist);
     }
 
     @NonNullDecl
     @Override
     public Vector3i getPosition() {
-      return ItemLootContainerState.this.getPosition();
+      return ItemLootContainerBlock.this.getPosition();
     }
 
     @Override
     public int getBlockX() {
-      return ItemLootContainerState.this.getBlockX();
+      return ItemLootContainerBlock.this.getBlockX();
     }
 
     @Override
     public int getBlockY() {
-      return ItemLootContainerState.this.getBlockY();
+      return ItemLootContainerBlock.this.getBlockY();
     }
 
     @Override
     public int getBlockZ() {
-      return ItemLootContainerState.this.getBlockZ();
+      return ItemLootContainerBlock.this.getBlockZ();
     }
 
     @NonNullDecl
     @Override
     public Vector3i getBlockPosition() {
-      return ItemLootContainerState.this.getBlockPosition();
+      return ItemLootContainerBlock.this.getBlockPosition();
     }
 
     @NonNullDecl
     @Override
     public Vector3d getCenteredBlockPosition() {
-      return ItemLootContainerState.this.getCenteredBlockPosition();
+      return ItemLootContainerBlock.this.getCenteredBlockPosition();
     }
 
     @NullableDecl
     @Override
     public WorldChunk getChunk() {
-      return ItemLootContainerState.this.getChunk();
+      return ItemLootContainerBlock.this.getChunk();
     }
 
     @NullableDecl
     @Override
     public BlockType getBlockType() {
-      return ItemLootContainerState.this.getBlockType();
+      return ItemLootContainerBlock.this.getBlockType();
     }
 
     @Override
     public int getRotationIndex() {
-      return ItemLootContainerState.this.getRotationIndex();
+      return ItemLootContainerBlock.this.getRotationIndex();
     }
   }
 
-  public static ItemLootContainerState fromContainerState(String originalBlockName, ItemContainerState state) {
-    if (state instanceof ItemLootContainerState lootContainerState) {
+  public static ItemLootContainerBlock fromContainerState(String originalBlockName, ItemContainerState state) {
+    if (state instanceof ItemLootContainerBlock lootContainerState) {
       return lootContainerState;
     }
 
