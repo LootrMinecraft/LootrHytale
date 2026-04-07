@@ -60,7 +60,7 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     }
   }
 
-  public static final Codec<ItemLootContainerBlock> CODEC = BuilderCodec.builder(
+  public static final BuilderCodec<ItemLootContainerBlock> CODEC = BuilderCodec.builder(
           ItemLootContainerBlock.class, ItemLootContainerBlock::new, ItemContainerBlock.CODEC
       )
       .addField(new KeyedCodec<>("Capacity", Codec.SHORT), (state, o) -> state.capacity = o, (state) -> state.capacity)
@@ -73,7 +73,7 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
       )
       .addField(
           new KeyedCodec<>("PlayerContainers",
-              new MapCodec<>(ItemContainer.CODEC, ConcurrentHashMap::new)),
+              new MapCodec<>(SimpleItemContainer.CODEC, ConcurrentHashMap::new)),
           (state, o) ->
 
           {
@@ -177,7 +177,7 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
 
   @Override
   public void setDroplist(@Nullable String droplist) {
-    if (droplist == null && (template == null || template == EmptyItemContainer.INSTANCE)) {
+    if (droplist == null && (template == null || template == EmptySimpleItemContainer.INSTANCE)) {
       return;
     }
     this.droplist = droplist;
@@ -201,7 +201,7 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
       }
     }
     if (playerContainers.putIfAbsent(player, newContainer) == null) {
-      newContainer.registerChangeEvent(EventPriority.LAST, this::onItemChange);
+/*      newContainer.registerChangeEvent(EventPriority.LAST, this::onItemChange);*/
       TemporaryContainerState temp = new TemporaryContainerState(newContainer);
       StashPlugin.stash(temp, false);
       return newContainer;
@@ -210,7 +210,7 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     }
   }
 
-  @Override
+/*  @Override
   public void tick(float tick, int index, ArchetypeChunk<ChunkStore> archetype, Store<ChunkStore> store, CommandBuffer<ChunkStore> commandBuffer) {
     if (uuid == null) {
       uuid = UUID.randomUUID();
@@ -265,7 +265,7 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
       return playerContainers.containsKey(playerref.getUuid());
     });
     ParticleUtil.spawnParticleEffect("Noobanidus_Lootr_UnopenedChestSparkles", vector3d.x, vector3d.y, vector3d.z, 0f, 0f, 0f, 1f, new com.hypixel.hytale.protocol.Color((byte) 240, (byte) 203, (byte) 86), null, objectlist, entityStore);
-  }
+  }*/
 
   // This monstrosity allows us to reuse `StashPlugin::stash` without cloning it
   // TODO: If at any point StashPlugin is adjusted and tries to access other methods of ItemContainerState, this will most likely break as they'll end up being null.
@@ -356,5 +356,9 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     newState.initialize(LootrPlugin.get().getLootrChestBlockType());
     newState.droplist = state.getDroplist();
     return newState;
+  }
+
+  public static ComponentType<ChunkStore, ItemLootContainerBlock> getLootComponentType() {
+    return LootrPlugin.get().getLootContainerType();
   }
 }

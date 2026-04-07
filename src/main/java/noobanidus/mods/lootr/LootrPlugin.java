@@ -7,6 +7,8 @@ import com.hypixel.hytale.common.map.WeightedMap;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.modules.block.BlockModule;
+import com.hypixel.hytale.server.core.modules.block.components.ItemContainerBlock;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
@@ -48,7 +50,8 @@ public class LootrPlugin extends JavaPlugin {
   private final Config<LootrConfig> config;
   private ComponentType<ChunkStore, ItemLootContainerBlock> ITEM_LOOT_CONTAINER_COMPONENT_TYPE = null;
   private ComponentType<ChunkStore, UUIDComponent> UUID_COMPONENT_TYPE = null;
-  private ComponentType<ChunkStore, ItemContainerState> ITEM_CONTAINER_STATE_COMPONENT_TYPE = null;
+  private ComponentType<ChunkStore, ItemContainerBlock> ITEM_CONTAINER_STATE_COMPONENT_TYPE = null;
+  private ComponentType<ChunkStore, BlockModule.BlockStateInfo> BLOCK_STATE_INFO_COMPONENT_TYPE = null;
   private BlockType LOOTR_CHEST_BLOCK_TYPE = null;
   private final Set<String> WRAPPED_TABLES = ConcurrentHashMap.newKeySet();
 
@@ -75,13 +78,13 @@ public class LootrPlugin extends JavaPlugin {
   protected void setup() {
     super.setup();
     this.config.save();
-    this.getBlockStateRegistry()
-        .registerBlockState(ItemLootContainerBlock.class, LOOT_CHEST_ID, ItemLootContainerBlock.CODEC, ItemContainerState.ItemContainerStateData.class, ItemContainerState.ItemContainerStateData.CODEC);
-    this.getChunkStoreRegistry().registerSystem(new BlockSpawnerPreSystem());
+    var registry = this.getChunkStoreRegistry();
+    ITEM_LOOT_CONTAINER_COMPONENT_TYPE = registry.registerComponent(ItemLootContainerBlock.class, LOOT_CHEST_ID, ItemLootContainerBlock.CODEC);
+    registry.registerSystem(new BlockSpawnerPreSystem());
     this.getCodecRegistry(Interaction.CODEC)
         .register(LOOT_CONTAINER_INTERACTION, OpenLootContainerInteraction.class, OpenLootContainerInteraction.CODEC);
     this.getEntityStoreRegistry().registerSystem(new BlockBreakEventSystem());
-    UUID_COMPONENT_TYPE = this.getChunkStoreRegistry()
+    UUID_COMPONENT_TYPE = registry
         .registerComponent(UUIDComponent.class, LOOT_UUID, UUIDComponent.CODEC);
     this.getCommandRegistry().registerCommand(new LootrCommand());
   }
@@ -91,19 +94,15 @@ public class LootrPlugin extends JavaPlugin {
     return WRAPPED_TABLES.contains(blockSpawnerId);
   }
 
-  public ComponentType<ChunkStore, ItemContainerState> getContainerType() {
+  public ComponentType<ChunkStore, ItemContainerBlock> getContainerType() {
     if (ITEM_CONTAINER_STATE_COMPONENT_TYPE == null) {
-      ITEM_CONTAINER_STATE_COMPONENT_TYPE = BlockStateModule.get()
-          .getComponentType(ItemContainerState.class);
+      ITEM_CONTAINER_STATE_COMPONENT_TYPE = ItemContainerBlock.getComponentType();
     }
     return ITEM_CONTAINER_STATE_COMPONENT_TYPE;
   }
 
   public ComponentType<ChunkStore, ItemLootContainerBlock> getLootContainerType() {
-    if (ITEM_LOOT_CONTAINER_COMPONENT_TYPE == null) {
-      ITEM_LOOT_CONTAINER_COMPONENT_TYPE = BlockStateModule.get().getComponentType(ItemLootContainerBlock.class);
-    }
-    return ITEM_LOOT_CONTAINER_COMPONENT_TYPE;
+    return Objects.requireNonNull(ITEM_LOOT_CONTAINER_COMPONENT_TYPE, "Item Loot Container Component Type has not been initialized yet");
   }
 
   public ComponentType<ChunkStore, UUIDComponent> getUuidComponentType() {
