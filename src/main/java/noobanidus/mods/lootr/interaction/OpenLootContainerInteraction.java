@@ -79,7 +79,7 @@ public class OpenLootContainerInteraction extends SimpleBlockInteraction {
               UUID uuid = uuidcomponent.getUuid();
               WorldChunk worldchunk = world.getChunk(ChunkUtil.indexChunkFromBlock(pos.x, pos.z));
               ContainerBlockWindow containerblockwindow = new ContainerBlockWindow(
-                  pos.x, pos.y, pos.z, worldchunk.getRotationIndex(pos.x, pos.y, pos.z), blocktype, itemcontainerblock.getItemContainer(player, uuid)
+                  pos.x, pos.y, pos.z, worldchunk.getRotationIndex(pos.x, pos.y, pos.z), blocktype, itemcontainerblock.getItemContainer(ref2, chunkstore.getStore(), player, uuid)
               );
               Map<UUID, ContainerBlockWindow> map = itemcontainerblock.getWindows();
               if (map.putIfAbsent(uuid, containerblockwindow) == null) {

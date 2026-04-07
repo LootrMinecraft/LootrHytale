@@ -5,36 +5,21 @@ import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.map.MapCodec;
-import com.hypixel.hytale.common.thread.ticking.Tickable;
-import com.hypixel.hytale.component.*;
-import com.hypixel.hytale.component.spatial.SpatialResource;
-import com.hypixel.hytale.event.EventPriority;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3i;
+import com.hypixel.hytale.component.ComponentType;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
-import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.entity.entities.player.windows.WindowManager;
-import com.hypixel.hytale.server.core.inventory.container.EmptyItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer;
 import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.modules.block.components.ItemContainerBlock;
-import com.hypixel.hytale.server.core.modules.entity.EntityModule;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.hypixel.hytale.server.core.universe.world.ParticleUtil;
-import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
-import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import it.unimi.dsi.fastutil.objects.ObjectList;
 import noobanidus.mods.lootr.LootrPlugin;
-import noobanidus.mods.lootr.component.UUIDComponent;
 import noobanidus.mods.lootr.container.EmptySimpleItemContainer;
 import org.bson.BsonDocument;
-import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.lang.invoke.MethodHandle;
@@ -110,11 +95,11 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
 
   private UUID uuid = null;
 
-  public ItemLootContainerBlock () {
+  public ItemLootContainerBlock() {
     super(EMPTY);
   }
 
-  public ItemLootContainerBlock (ItemLootContainerBlock other) {
+  public ItemLootContainerBlock(ItemLootContainerBlock other) {
     super(other);
     this.originalBlock = other.originalBlock;
     this.template = other.template == null ? null : other.template.clone();
@@ -188,7 +173,7 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     return EmptySimpleItemContainer.INSTANCE;
   }
 
-  public SimpleItemContainer getItemContainer(Player playerComponent, UUID player) {
+  public SimpleItemContainer getItemContainer(Ref<ChunkStore> ref, Store<ChunkStore> store, Player playerComponent, UUID player) {
     SimpleItemContainer newContainer = new SimpleItemContainer(this.capacity);
     if ("".equals(droplist) || droplist == null || droplist.isEmpty()) {
       if (template == null || template == EmptySimpleItemContainer.INSTANCE) {
@@ -201,15 +186,17 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
       }
     }
     if (playerContainers.putIfAbsent(player, newContainer) == null) {
-/*      newContainer.registerChangeEvent(EventPriority.LAST, this::onItemChange);*/
+      BlockModule.BlockStateInfo blockmodule$blockstateinfo = store.getComponent(ref, BlockModule.BlockStateInfo.getComponentType());
+      /*      newContainer.registerChangeEvent(EventPriority.LAST, this::onItemChange);*/
       TemporaryContainerState temp = new TemporaryContainerState(newContainer);
-      StashPlugin.stash(temp, false);
+      StashPlugin.stash(blockmodule$blockstateinfo, temp, false);
       return newContainer;
     } else {
       return playerContainers.get(player);
     }
   }
 
+  // TODO: Ticking
 /*  @Override
   public void tick(float tick, int index, ArchetypeChunk<ChunkStore> archetype, Store<ChunkStore> store, CommandBuffer<ChunkStore> commandBuffer) {
     if (uuid == null) {
@@ -269,15 +256,16 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
 
   // This monstrosity allows us to reuse `StashPlugin::stash` without cloning it
   // TODO: If at any point StashPlugin is adjusted and tries to access other methods of ItemContainerState, this will most likely break as they'll end up being null.
-  private class TemporaryContainerState extends ItemContainerState {
-    private final ItemContainer container;
+  private class TemporaryContainerState extends ItemContainerBlock {
+    private final SimpleItemContainer container;
 
-    public TemporaryContainerState(ItemContainer container) {
+    public TemporaryContainerState(SimpleItemContainer container) {
+      super(EMPTY);
       this.container = container;
     }
 
     @Override
-    public ItemContainer getItemContainer() {
+    public SimpleItemContainer getItemContainer() {
       return container;
     }
 
@@ -291,59 +279,9 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     public void setDroplist(@NullableDecl String droplist) {
       ItemLootContainerBlock.this.setDroplist(droplist);
     }
-
-    @NonNullDecl
-    @Override
-    public Vector3i getPosition() {
-      return ItemLootContainerBlock.this.getPosition();
-    }
-
-    @Override
-    public int getBlockX() {
-      return ItemLootContainerBlock.this.getBlockX();
-    }
-
-    @Override
-    public int getBlockY() {
-      return ItemLootContainerBlock.this.getBlockY();
-    }
-
-    @Override
-    public int getBlockZ() {
-      return ItemLootContainerBlock.this.getBlockZ();
-    }
-
-    @NonNullDecl
-    @Override
-    public Vector3i getBlockPosition() {
-      return ItemLootContainerBlock.this.getBlockPosition();
-    }
-
-    @NonNullDecl
-    @Override
-    public Vector3d getCenteredBlockPosition() {
-      return ItemLootContainerBlock.this.getCenteredBlockPosition();
-    }
-
-    @NullableDecl
-    @Override
-    public WorldChunk getChunk() {
-      return ItemLootContainerBlock.this.getChunk();
-    }
-
-    @NullableDecl
-    @Override
-    public BlockType getBlockType() {
-      return ItemLootContainerBlock.this.getBlockType();
-    }
-
-    @Override
-    public int getRotationIndex() {
-      return ItemLootContainerBlock.this.getRotationIndex();
-    }
   }
 
-  public static ItemLootContainerBlock fromContainerState(String originalBlockName, ItemContainerState state) {
+  public static ItemLootContainerBlock fromContainerState(String originalBlockName, ItemContainerBlock state) {
     if (state instanceof ItemLootContainerBlock lootContainerState) {
       return lootContainerState;
     }
@@ -353,7 +291,8 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
       throw new RuntimeException();
     }
     newState.setOriginalBlock(originalBlockName);
-    newState.initialize(LootrPlugin.get().getLootrChestBlockType());
+    // ToDO: What did initialize previously do?
+    //newState.initialize(LootrPlugin.get().getLootrChestBlockType());
     newState.droplist = state.getDroplist();
     return newState;
   }

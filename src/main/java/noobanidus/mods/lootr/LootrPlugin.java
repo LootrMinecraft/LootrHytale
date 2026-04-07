@@ -12,8 +12,6 @@ import com.hypixel.hytale.server.core.modules.block.components.ItemContainerBloc
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
-import com.hypixel.hytale.server.core.universe.world.meta.BlockStateModule;
-import com.hypixel.hytale.server.core.universe.world.meta.state.ItemContainerState;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.util.Config;
 import noobanidus.mods.lootr.command.LootrCommand;
@@ -34,7 +32,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
-@SuppressWarnings("removal")
 public class LootrPlugin extends JavaPlugin {
   private static LootrPlugin instance;
 
@@ -51,7 +48,6 @@ public class LootrPlugin extends JavaPlugin {
   private ComponentType<ChunkStore, ItemLootContainerBlock> ITEM_LOOT_CONTAINER_COMPONENT_TYPE = null;
   private ComponentType<ChunkStore, UUIDComponent> UUID_COMPONENT_TYPE = null;
   private ComponentType<ChunkStore, ItemContainerBlock> ITEM_CONTAINER_STATE_COMPONENT_TYPE = null;
-  private ComponentType<ChunkStore, BlockModule.BlockStateInfo> BLOCK_STATE_INFO_COMPONENT_TYPE = null;
   private BlockType LOOTR_CHEST_BLOCK_TYPE = null;
   private final Set<String> WRAPPED_TABLES = ConcurrentHashMap.newKeySet();
 
