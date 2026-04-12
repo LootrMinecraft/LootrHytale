@@ -7,7 +7,6 @@ import com.hypixel.hytale.common.map.WeightedMap;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
-import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.modules.block.components.ItemContainerBlock;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
@@ -145,9 +144,9 @@ public class LootrPlugin extends JavaPlugin {
     for (BlockSpawnerEntry entry : table.getEntries().internalKeys()) {
       if (canWrap(entry)) {
         var comp = entry.getBlockComponents().clone();
-        var state = comp.getComponent(getContainerType());
+        var block = comp.getComponent(getContainerType());
         comp.removeComponent(getContainerType());
-        comp.addComponent(getLootContainerType(), ItemLootContainerBlock.fromContainerState(entry.getBlockName(), state));
+        comp.addComponent(getLootContainerType(), ItemLootContainerBlock.fromItemContainerBlock(entry.getBlockName(), block));
         entries.add(new TransformedBlockSpawnerEntry(entry, LootrPlugin.LOOT_CHEST_ID, comp));
       } else {
         entries.add(entry);

@@ -1,15 +1,16 @@
 package noobanidus.mods.lootr.command;
 
+import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.protocol.GameMode;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
+import com.hypixel.hytale.server.core.modules.block.components.ItemContainerBlock;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.commands.block.SimpleBlockCommand;
-import com.hypixel.hytale.server.core.universe.world.meta.BlockState;
-import com.hypixel.hytale.server.core.universe.world.meta.state.ItemContainerState;
+import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import noobanidus.mods.lootr.LootrPlugin;
 import noobanidus.mods.lootr.state.ItemLootContainerBlock;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
@@ -35,36 +36,49 @@ public class LootrCommand extends AbstractCommandCollection {
       if (type == null || type.getId().equals(LootrPlugin.LOOT_CHEST_ID)) {
         return;
       }
-      // TODO: Handle combined chests?
-      // TODO: Handle rotation?
-      BlockState state = chunk.getState(x, y, z);
-      if (state instanceof ItemContainerState itemContainerState) {
-        var copy = itemContainerState.getItemContainer().clone();
-        itemContainerState.getItemContainer().clear();
-        var rotation = chunk.getRotationIndex(x, y, z);
-        chunk.setBlock(x, y, z, BlockType.getAssetMap().getIndex(LootrPlugin.LOOT_CHEST_ID), LootrPlugin.get().getLootrChestBlockType(), rotation, 0, 0);
-        if (chunk.getState(x, y, z) instanceof ItemLootContainerBlock lootContainerState) {
-          lootContainerState.setDroplist(null);
-          lootContainerState.setOriginalBlock(type.getId());
-          lootContainerState.setTemplate(copy);
-          if (type.getState() instanceof ItemContainerState.ItemContainerStateData stateData) {
-            lootContainerState.setCapacity(stateData.getCapacity());
-          } else {
-            lootContainerState.setCapacity((short) Math.max(18, copy.getCapacity()));
-          }
-          commandsender.sendMessage(
-              Message.translation("commands.lootr.custom.success").param("x", x).param("y", y).param("z", z)
-          );
-        } else {
-          commandsender.sendMessage(
-              Message.translation("commands.lootr.custom.failure_to_replace").param("x", x).param("y", y).param("z", z)
-          );
-        }
-      } else {
+      Ref<ChunkStore> entityRef = chunk.getBlockComponentEntity(x, y, z);
+      if (entityRef == null) {
         commandsender.sendMessage(
-            Message.translation("commands.lootr.custom.failure_invalid_state").param("x", x).param("y", y).param("z", z).param("type", type.getId())
+            Message.translation("commands.lootr.custom.failure_invalid_state").param("x", x).param("y", y).param("z", z)
+                .param("type", type.getId())
         );
+        return; // ???
       }
+
+      // TODO: Is this correct?
+      var store = chunk.getWorld().getChunkStore();
+
+      ItemContainerBlock itemcontainerblock = store.getStore()
+          .getComponent(entityRef, ItemContainerBlock.getComponentType());
+      if (itemcontainerblock == null) {
+        commandsender.sendMessage(
+            Message.translation("commands.lootr.custom.failure_invalid_state").param("x", x).param("y", y).param("z", z)
+                .param("type", type.getId())
+        );
+        return; // TODO: I had some message for this
+      }
+      // This creates the template
+      var template = itemcontainerblock.getItemContainer().clone();
+      // This clears the original chest
+      itemcontainerblock.getItemContainer().clear();
+      var rotation = chunk.getRotationIndex(x, y, z);
+      chunk.setBlock(x, y, z, BlockType.getAssetMap().getIndex(LootrPlugin.LOOT_CHEST_ID), LootrPlugin.get()
+          .getLootrChestBlockType(), rotation, 0, 0);
+
+      var newBlock = store.getStore().getComponent(entityRef, ItemLootContainerBlock.getLootComponentType());
+      if (newBlock == null) {
+        commandsender.sendMessage(
+            Message.translation("commands.lootr.custom.failure_to_replace").param("x", x).param("y", y).param("z", z)
+        );
+        return; // TODO: Something something message here
+      }
+      newBlock.setDroplist(null);
+      newBlock.setOriginalBlock(type.getId());
+      newBlock.setTemplate(template);
+      newBlock.setCapacity((short) Math.max(18, template.getCapacity()));
+      commandsender.sendMessage(
+          Message.translation("commands.lootr.custom.success").param("x", x).param("y", y).param("z", z)
+      );
     }
   }
 }

@@ -8,16 +8,17 @@ import com.hypixel.hytale.codec.codecs.map.MapCodec;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.event.EventPriority;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer;
 import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.modules.block.components.ItemContainerBlock;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import noobanidus.mods.lootr.LootrPlugin;
 import noobanidus.mods.lootr.container.EmptySimpleItemContainer;
-import org.bson.BsonDocument;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import javax.annotation.Nullable;
@@ -31,10 +32,11 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
-@SuppressWarnings({"removal", "deprecation"})
 public class ItemLootContainerBlock extends ItemContainerBlock {
   private static final ItemContainerBlock EMPTY;
 
+  // TODO: This could break at any moment.
+  // TODO: Beg the Gods of Hytale to please make the constructor Protected.
   static {
     try {
       MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(ItemContainerBlock.class, MethodHandles.lookup());
@@ -45,6 +47,8 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     }
   }
 
+  // TODO: Who knows when the `addField` deprecation will break things???
+  @SuppressWarnings("deprecation")
   public static final BuilderCodec<ItemLootContainerBlock> CODEC = BuilderCodec.builder(
           ItemLootContainerBlock.class, ItemLootContainerBlock::new, ItemContainerBlock.CODEC
       )
@@ -76,7 +80,6 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
             state.playerContainers = newMap;
           },
           state ->
-
           {
             HashMap<String, SimpleItemContainer> temp = new HashMap<>();
             for (Map.Entry<UUID, SimpleItemContainer> entry : state.playerContainers.entrySet()) {
@@ -99,12 +102,19 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     super(EMPTY);
   }
 
+  @SuppressWarnings({"unused", "CopyConstructorMissesField"})
   public ItemLootContainerBlock(ItemLootContainerBlock other) {
     super(other);
     this.originalBlock = other.originalBlock;
     this.template = other.template == null ? null : other.template.clone();
     this.uuid = other.uuid == null ? null : other.uuid;
+    this.capacity = other.capacity;
+  }
 
+  public ItemLootContainerBlock(ItemContainerBlock block) {
+    super(block);
+    // TODO: When reverting to super capacity, remove this
+    this.capacity = block.getCapacity();
   }
 
   public void setOriginalBlock(String originalBlock) {
@@ -120,42 +130,12 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     }
   }
 
-/*  @Override
-  public boolean initialize(@Nonnull BlockType blockType) {
-    var oldCustom = this.custom;
-    this.custom = true;
-    var result = super.initialize(blockType);
-    this.custom = oldCustom;
-    if (!result) {
-      return false;
-    }
-
-    if (this.capacity == -1) {
-      this.capacity = 1;
-    }
-
-    if (originalBlock != null) {
-      BlockType originalBlockType = BlockType.getAssetMap().getAsset(originalBlock);
-      if (originalBlockType != null && originalBlockType.getState() instanceof ItemContainerStateData data) {
-        this.capacity = data.getCapacity();
-      }
-    }
-
-    return true;
-  }*/
-
-/*
-  @Override
-  public void onDestroy() {
-    WindowManager.closeAndRemoveAll(this.getWindows());
-  }
-*/
-
   @Override
   public void setItemContainer(SimpleItemContainer itemContainer) {
     // NO-OP
   }
 
+  // TODO: Default capacity will be stored in encoded block entity (ItemLootContainerBlock) with 1. Ensure capacity is properly copied from template block.
   public void setCapacity(short capacity) {
     this.capacity = capacity;
   }
@@ -180,15 +160,25 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
         playerComponent.sendMessage(
             Message.translation("general.Noobanidus_Lootr.NoDropList").bold(true).color(Color.red)
         );
-        // TODO: Return empty?
+        return EmptySimpleItemContainer.INSTANCE;
       } else {
         ItemContainer.copy(template, newContainer, null);
       }
     }
     if (playerContainers.putIfAbsent(player, newContainer) == null) {
       BlockModule.BlockStateInfo blockmodule$blockstateinfo = store.getComponent(ref, BlockModule.BlockStateInfo.getComponentType());
-      /*      newContainer.registerChangeEvent(EventPriority.LAST, this::onItemChange);*/
-      TemporaryContainerState temp = new TemporaryContainerState(newContainer);
+      assert blockmodule$blockstateinfo != null;
+      // Ensure container capacity
+      ItemContainer.ensureContainerCapacity(newContainer, this.capacity, SimpleItemContainer::new, null /* This is null as we don't want to drop any items */);
+      World world = store.getExternalData().getWorld();
+      newContainer.registerChangeEvent(EventPriority.LAST, _ -> {
+        if (world.isInThread()) {
+          blockmodule$blockstateinfo.markNeedsSaving();
+        } else {
+          world.execute(blockmodule$blockstateinfo::markNeedsSaving);
+        }
+      });
+      TemporaryItemContainerBlock temp = new TemporaryItemContainerBlock(newContainer);
       StashPlugin.stash(blockmodule$blockstateinfo, temp, false);
       return newContainer;
     } else {
@@ -196,7 +186,9 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     }
   }
 
+  // TODO: onAdded system reference UseWateringCanInteraction::interactWithBlock ->
   // TODO: Ticking
+  // TODO: Check BlockType::323 particles for spawning system
 /*  @Override
   public void tick(float tick, int index, ArchetypeChunk<ChunkStore> archetype, Store<ChunkStore> store, CommandBuffer<ChunkStore> commandBuffer) {
     if (uuid == null) {
@@ -254,12 +246,10 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     ParticleUtil.spawnParticleEffect("Noobanidus_Lootr_UnopenedChestSparkles", vector3d.x, vector3d.y, vector3d.z, 0f, 0f, 0f, 1f, new com.hypixel.hytale.protocol.Color((byte) 240, (byte) 203, (byte) 86), null, objectlist, entityStore);
   }*/
 
-  // This monstrosity allows us to reuse `StashPlugin::stash` without cloning it
-  // TODO: If at any point StashPlugin is adjusted and tries to access other methods of ItemContainerState, this will most likely break as they'll end up being null.
-  private class TemporaryContainerState extends ItemContainerBlock {
+  private class TemporaryItemContainerBlock extends ItemContainerBlock {
     private final SimpleItemContainer container;
 
-    public TemporaryContainerState(SimpleItemContainer container) {
+    public TemporaryItemContainerBlock(SimpleItemContainer container) {
       super(EMPTY);
       this.container = container;
     }
@@ -281,20 +271,15 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     }
   }
 
-  public static ItemLootContainerBlock fromContainerState(String originalBlockName, ItemContainerBlock state) {
-    if (state instanceof ItemLootContainerBlock lootContainerState) {
+  public static ItemLootContainerBlock fromItemContainerBlock(String originalBlockName, ItemContainerBlock block) {
+    if (block instanceof ItemLootContainerBlock lootContainerState) {
       return lootContainerState;
     }
 
-    var newState = CODEC.decode(new BsonDocument());
-    if (newState == null) {
-      throw new RuntimeException();
-    }
-    newState.setOriginalBlock(originalBlockName);
-    // ToDO: What did initialize previously do?
-    //newState.initialize(LootrPlugin.get().getLootrChestBlockType());
-    newState.droplist = state.getDroplist();
-    return newState;
+    // TODO: This might be the wrong way to create a new ItemLootContainerBlock
+    var newBlock = new ItemLootContainerBlock(block);
+    newBlock.setOriginalBlock(originalBlockName);
+    return newBlock;
   }
 
   public static ComponentType<ChunkStore, ItemLootContainerBlock> getLootComponentType() {
