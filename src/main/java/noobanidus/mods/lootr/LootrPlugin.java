@@ -7,19 +7,24 @@ import com.hypixel.hytale.common.map.WeightedMap;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.modules.block.components.ItemContainerBlock;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.ChunkSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.util.Config;
 import noobanidus.mods.lootr.command.LootrCommand;
 import noobanidus.mods.lootr.component.UUIDComponent;
 import noobanidus.mods.lootr.config.LootrConfig;
 import noobanidus.mods.lootr.interaction.OpenLootContainerInteraction;
-import noobanidus.mods.lootr.state.ItemLootContainerBlock;
+import noobanidus.mods.lootr.block.ItemLootContainerBlock;
 import noobanidus.mods.lootr.system.BlockBreakEventSystem;
 import noobanidus.mods.lootr.system.BlockSpawnerPreSystem;
+import noobanidus.mods.lootr.system.LootContainerBlockAddedSystem;
+import noobanidus.mods.lootr.system.LootContainerBlockTickSystem;
 import noobanidus.mods.lootr.util.ReflectionHelper;
 import noobanidus.mods.lootr.util.TransformedBlockSpawnerEntry;
 
@@ -82,6 +87,11 @@ public class LootrPlugin extends JavaPlugin {
     UUID_COMPONENT_TYPE = registry
         .registerComponent(UUIDComponent.class, LOOT_UUID, UUIDComponent.CODEC);
     this.getCommandRegistry().registerCommand(new LootrCommand());
+    ComponentType<ChunkStore, BlockModule.BlockStateInfo> componenttype = BlockModule.BlockStateInfo.getComponentType();
+    ComponentType<ChunkStore, BlockSection> componenttype1 = BlockSection.getComponentType();
+    ComponentType<ChunkStore, ChunkSection> componenttype2 = ChunkSection.getComponentType();
+    registry.registerSystem(new LootContainerBlockTickSystem(componenttype1, componenttype2, ITEM_LOOT_CONTAINER_COMPONENT_TYPE));
+    registry.registerSystem(new LootContainerBlockAddedSystem(componenttype, ITEM_LOOT_CONTAINER_COMPONENT_TYPE));
   }
 
 
@@ -130,7 +140,7 @@ public class LootrPlugin extends JavaPlugin {
       return false;
     }
     var blockType = BlockType.getAssetMap().getAsset(entry.getBlockName());
-    if (blockType == null || !LootrPlugin.get().getConfig().canBeConverted(blockType.getState())) {
+    if (blockType == null || !LootrPlugin.get().getConfig().canBeConverted(blockType, comp)) {
       return false;
     }
     return comp.getDroplist() != null;

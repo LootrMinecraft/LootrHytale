@@ -1,22 +1,30 @@
-package noobanidus.mods.lootr.state;
+package noobanidus.mods.lootr.block;
 
 import com.hypixel.hytale.builtin.adventure.stash.StashPlugin;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.map.MapCodec;
-import com.hypixel.hytale.component.ComponentType;
-import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.component.*;
+import com.hypixel.hytale.component.spatial.SpatialResource;
 import com.hypixel.hytale.event.EventPriority;
+import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer;
 import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.modules.block.components.ItemContainerBlock;
+import com.hypixel.hytale.server.core.modules.entity.EntityModule;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.ParticleUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.chunk.BlockChunk;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import noobanidus.mods.lootr.LootrPlugin;
 import noobanidus.mods.lootr.container.EmptySimpleItemContainer;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
@@ -27,7 +35,9 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -117,6 +127,10 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     this.capacity = block.getCapacity();
   }
 
+  public Set<UUID> getPlayerContainerKeys() {
+    return playerContainers.keySet();
+  }
+
   public void setOriginalBlock(String originalBlock) {
     this.originalBlock = originalBlock;
   }
@@ -186,11 +200,13 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     }
   }
 
-  // TODO: onAdded system reference UseWateringCanInteraction::interactWithBlock ->
-  // TODO: Ticking
-  // TODO: Check BlockType::323 particles for spawning system
-/*  @Override
-  public void tick(float tick, int index, ArchetypeChunk<ChunkStore> archetype, Store<ChunkStore> store, CommandBuffer<ChunkStore> commandBuffer) {
+  public void tick (CommandBuffer<ChunkStore> commandBuffer, BlockChunk blockChunk, BlockSection blockSection, Ref<ChunkStore> sectionRef, Ref<ChunkStore> blockRef, int x, int y, int z, boolean initialTick) {
+    ComponentType<EntityStore, PlayerRef> componenttype = PlayerRef.getComponentType();
+
+    Vector3d vector3d = new Vector3d(x, y, z).add(0.5); // TODO:
+
+    // TODO: Stuff
+    /*
     if (uuid == null) {
       uuid = UUID.randomUUID();
       commandBuffer.run((chunkStore) -> {
@@ -213,18 +229,14 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
               .log("Could not store UUID for Lootr chest at %s.", this.getCenteredBlockPosition());
         }
       });
-    }
+    } */
 
-    // This section does pretty particles
-    ComponentType<EntityStore, PlayerRef> componenttype = PlayerRef.getComponentType();
-
-    Vector3d vector3d = this.getCenteredBlockPosition();
     var entityStore = commandBuffer.getExternalData().getWorld().getEntityStore().getStore();
     var spatialresource = entityStore
         .getResource(
             EntityModule.get().getPlayerSpatialResourceType()
         );
-    ObjectList<Ref<EntityStore>> objectlist = SpatialResource.getThreadLocalReferenceList();
+    List<Ref<EntityStore>> objectlist = SpatialResource.getThreadLocalReferenceList();
     spatialresource.getSpatialStructure().collect(vector3d, 30.0, objectlist);
     objectlist.removeIf(ref -> {
       if (!ref.isValid()) {
@@ -244,7 +256,7 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
       return playerContainers.containsKey(playerref.getUuid());
     });
     ParticleUtil.spawnParticleEffect("Noobanidus_Lootr_UnopenedChestSparkles", vector3d.x, vector3d.y, vector3d.z, 0f, 0f, 0f, 1f, new com.hypixel.hytale.protocol.Color((byte) 240, (byte) 203, (byte) 86), null, objectlist, entityStore);
-  }*/
+  }
 
   private class TemporaryItemContainerBlock extends ItemContainerBlock {
     private final SimpleItemContainer container;

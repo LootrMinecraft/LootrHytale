@@ -41,10 +41,11 @@ hytale {
         includesAssetPack = true
         disabledByDefault = false
 
-        dependency("Hytale:BlockStateModule", "*")
+        dependency("Hytale:LegacyModule", "*")
         dependency("Hytale:BlockModule", "*")
         dependency("Hytale:EntityModule", "*")
         dependency("Hytale:BlockSpawner", "*")
+        dependency("Hytale:InteractionModule", "*")
     }
 }
 

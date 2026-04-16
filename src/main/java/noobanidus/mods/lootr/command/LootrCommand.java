@@ -12,7 +12,7 @@ import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.commands.block.SimpleBlockCommand;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import noobanidus.mods.lootr.LootrPlugin;
-import noobanidus.mods.lootr.state.ItemLootContainerBlock;
+import noobanidus.mods.lootr.block.ItemLootContainerBlock;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 public class LootrCommand extends AbstractCommandCollection {

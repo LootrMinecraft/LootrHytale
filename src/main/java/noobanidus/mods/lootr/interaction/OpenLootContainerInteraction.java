@@ -24,7 +24,7 @@ import com.hypixel.hytale.server.core.universe.world.chunk.BlockComponentChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import noobanidus.mods.lootr.state.ItemLootContainerBlock;
+import noobanidus.mods.lootr.block.ItemLootContainerBlock;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
