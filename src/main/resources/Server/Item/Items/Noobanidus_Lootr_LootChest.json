@@ -25,8 +25,7 @@
     },
     "Gathering": {
       "Breaking": {
-        "GatherType": "Woods",
-        "Quantity": 0
+        "GatherType": "Woods"
       }
     },
     "HitboxType": "Full",
@@ -34,8 +33,6 @@
     "Opacity": "Transparent",
     "ParticleColor": "#7a3d27",
     "State": {
-      "Id": "Noobanidus_Lootr_LootChest",
-      "Capacity": 1,
       "Definitions": {
         "CloseWindow": {
           "InteractionSoundEventId": "SFX_Chest_Wooden_Close",
@@ -44,6 +41,13 @@
         "OpenWindow": {
           "InteractionSoundEventId": "SFX_Chest_Wooden_Open",
           "CustomModelAnimation": "Blocks/Animations/Chest/Chest_Open.blockyanim"
+        }
+      }
+    },
+    "BlockEntity": {
+      "Components": {
+        "ItemLootContainerBlock": {
+          "Capacity": 1
         }
       }
     },
@@ -57,7 +61,6 @@
     "VariantRotation": "NESW",
     "InteractionHint": "server.interactionHints.open",
     "Interactions": {
-      "Primary": "Break_Container",
       "Use": "Noobanidus_Lootr_OpenLootContainer"
     }
   },

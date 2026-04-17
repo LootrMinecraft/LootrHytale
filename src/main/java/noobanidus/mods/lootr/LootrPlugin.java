@@ -78,20 +78,26 @@ public class LootrPlugin extends JavaPlugin {
   protected void setup() {
     super.setup();
     this.config.save();
-    var registry = this.getChunkStoreRegistry();
-    ITEM_LOOT_CONTAINER_COMPONENT_TYPE = registry.registerComponent(ItemLootContainerBlock.class, LOOT_CHEST_ID, ItemLootContainerBlock.CODEC);
-    registry.registerSystem(new BlockSpawnerPreSystem());
-    this.getCodecRegistry(Interaction.CODEC)
-        .register(LOOT_CONTAINER_INTERACTION, OpenLootContainerInteraction.class, OpenLootContainerInteraction.CODEC);
-    this.getEntityStoreRegistry().registerSystem(new BlockBreakEventSystem());
-    UUID_COMPONENT_TYPE = registry
-        .registerComponent(UUIDComponent.class, LOOT_UUID, UUIDComponent.CODEC);
-    this.getCommandRegistry().registerCommand(new LootrCommand());
+    ITEM_CONTAINER_STATE_COMPONENT_TYPE = ItemContainerBlock.getComponentType();
     ComponentType<ChunkStore, BlockModule.BlockStateInfo> componenttype = BlockModule.BlockStateInfo.getComponentType();
     ComponentType<ChunkStore, BlockSection> componenttype1 = BlockSection.getComponentType();
     ComponentType<ChunkStore, ChunkSection> componenttype2 = ChunkSection.getComponentType();
-    registry.registerSystem(new LootContainerBlockTickSystem(componenttype1, componenttype2, ITEM_LOOT_CONTAINER_COMPONENT_TYPE));
-    registry.registerSystem(new LootContainerBlockAddedSystem(componenttype, ITEM_LOOT_CONTAINER_COMPONENT_TYPE));
+
+    var registry = this.getChunkStoreRegistry();
+    var registry2 = this.getEntityStoreRegistry();
+    ITEM_LOOT_CONTAINER_COMPONENT_TYPE = registry.registerComponent(ItemLootContainerBlock.class, LOOT_CHEST_ID, ItemLootContainerBlock.CODEC);
+    UUID_COMPONENT_TYPE = registry
+        .registerComponent(UUIDComponent.class, LOOT_UUID, UUIDComponent.CODEC);
+
+    this.getCodecRegistry(Interaction.CODEC)
+        .register(LOOT_CONTAINER_INTERACTION, OpenLootContainerInteraction.class, OpenLootContainerInteraction.CODEC);
+
+    this.getCommandRegistry().registerCommand(new LootrCommand());
+
+    registry.registerSystem(new LootContainerBlockTickSystem(componenttype1, componenttype2, getLootContainerType()));
+    registry.registerSystem(new LootContainerBlockAddedSystem(componenttype, getLootContainerType()));
+    registry.registerSystem(new BlockSpawnerPreSystem());
+    registry2.registerSystem(new BlockBreakEventSystem());
   }
 
 
@@ -100,9 +106,6 @@ public class LootrPlugin extends JavaPlugin {
   }
 
   public ComponentType<ChunkStore, ItemContainerBlock> getContainerType() {
-    if (ITEM_CONTAINER_STATE_COMPONENT_TYPE == null) {
-      ITEM_CONTAINER_STATE_COMPONENT_TYPE = ItemContainerBlock.getComponentType();
-    }
     return ITEM_CONTAINER_STATE_COMPONENT_TYPE;
   }
 

@@ -32,11 +32,11 @@ public class BlockSpawnerPreSystem extends RefSystem<ChunkStore> {
     }
     WorldConfig worldConfig = store.getExternalData().getWorld().getWorldConfig();
     if (worldConfig.getGameMode() != GameMode.Creative) {
-      BlockSpawner state = commandBuffer.getComponent(ref, BlockSpawner.getComponentType());
+      BlockSpawner block = commandBuffer.getComponent(ref, BlockSpawner.getComponentType());
       BlockModule.BlockStateInfo info = commandBuffer.getComponent(ref, BlockModule.BlockStateInfo.getComponentType());
 
-      if (state != null && info != null) {
-        String blockSpawnerId = state.getBlockSpawnerId();
+      if (block != null && info != null) {
+        String blockSpawnerId = block.getBlockSpawnerId();
         if (blockSpawnerId != null) {
           BlockSpawnerTable table = BlockSpawnerTable.getAssetMap().getAsset(blockSpawnerId);
           if (table != null) {
@@ -58,13 +58,13 @@ public class BlockSpawnerPreSystem extends RefSystem<ChunkStore> {
     return Query.and(BlockSpawner.getComponentType(), BlockModule.BlockStateInfo.getComponentType());
   }
 
+  @SuppressWarnings("unchecked")
   @NonNullDecl
   @Override
   public Set<Dependency<ChunkStore>> getDependencies() {
     if (this.dependencies == null) {
       Class<RefSystem<ChunkStore>> cls;
       try {
-        //noinspection unchecked
         cls = (Class<RefSystem<ChunkStore>>) Class.forName("com.hypixel.hytale.builtin.blockspawner.BlockSpawnerPlugin$BlockSpawnerSystem");
       } catch (ClassNotFoundException e) {
         throw new RuntimeException(e);

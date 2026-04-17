@@ -5,12 +5,15 @@ import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.map.MapCodec;
-import com.hypixel.hytale.component.*;
+import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.Component;
+import com.hypixel.hytale.component.ComponentType;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.spatial.SpatialResource;
 import com.hypixel.hytale.event.EventPriority;
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.server.core.Message;
-import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer;
@@ -24,7 +27,6 @@ import com.hypixel.hytale.server.core.universe.world.chunk.BlockChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import it.unimi.dsi.fastutil.objects.ObjectList;
 import noobanidus.mods.lootr.LootrPlugin;
 import noobanidus.mods.lootr.container.EmptySimpleItemContainer;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
@@ -34,11 +36,8 @@ import java.awt.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
@@ -194,17 +193,26 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
       });
       TemporaryItemContainerBlock temp = new TemporaryItemContainerBlock(newContainer);
       StashPlugin.stash(blockmodule$blockstateinfo, temp, false);
+      if (world.isInThread()) {
+        blockmodule$blockstateinfo.markNeedsSaving();
+      } else {
+        world.execute(blockmodule$blockstateinfo::markNeedsSaving);
+      }
       return newContainer;
     } else {
       return playerContainers.get(player);
     }
   }
 
-  public void tick (CommandBuffer<ChunkStore> commandBuffer, BlockChunk blockChunk, BlockSection blockSection, Ref<ChunkStore> sectionRef, Ref<ChunkStore> blockRef, int x, int y, int z, boolean initialTick) {
+  @Nullable
+  public Component<ChunkStore> clone() {
+    return new ItemLootContainerBlock(this);
+  }
+
+  public void tick(CommandBuffer<ChunkStore> commandBuffer, BlockChunk blockChunk, BlockSection blockSection, Ref<ChunkStore> sectionRef, Ref<ChunkStore> blockRef, int x, int y, int z, boolean initialTick) {
     ComponentType<EntityStore, PlayerRef> componenttype = PlayerRef.getComponentType();
 
-    Vector3d vector3d = new Vector3d(x, y, z).add(0.5); // TODO:
-
+    Vector3d vector3d = new Vector3d(Math.floor(x) + 0.5, Math.floor(y) + 0.5, Math.floor(z) + 0.5);
     // TODO: Stuff
     /*
     if (uuid == null) {

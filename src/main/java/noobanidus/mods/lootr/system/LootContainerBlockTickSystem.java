@@ -32,7 +32,7 @@ public class LootContainerBlockTickSystem extends EntityTickingSystem<ChunkStore
     BlockSection blockSection = archetype.getComponent(index, this.blockSectionComponentType);
     assert blockSection != null;
 
-    if (blockSection.getTickingBlocksCount() == 0) {
+    if (blockSection.getTickingBlocksCountCopy() == 0) {
       return;
     }
 
