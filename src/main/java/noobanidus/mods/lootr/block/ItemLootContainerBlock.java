@@ -61,15 +61,17 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
   public static final BuilderCodec<ItemLootContainerBlock> CODEC = BuilderCodec.builder(
           ItemLootContainerBlock.class, ItemLootContainerBlock::new, ItemContainerBlock.CODEC
       )
-      .addField(new KeyedCodec<>("Capacity", Codec.SHORT), (state, o) -> state.capacity = o, (state) -> state.capacity)
-      .addField(new KeyedCodec<>("Droplist", Codec.STRING), (state, o) -> state.droplist = o, state -> state.droplist)
-      .addField(new KeyedCodec<>("OriginalBlock", Codec.STRING), (state, o) -> state.originalBlock = o, state -> state.originalBlock)
-      .addField(
+/*      .appendInherited(new KeyedCodec<>("Capacity", Codec.SHORT), (state, o) -> state.capacity = o, (state) -> state.capacity, (state, parent) -> state.capacity = parent.capacity)*/
+/*      .appendInherited(new KeyedCodec<>("Droplist", Codec.STRING), (state, o) -> state.droplist = o, state -> state.droplist, (state, parent) -> state.droplist = parent.droplist)*/
+      .appendInherited(new KeyedCodec<>("OriginalBlock", Codec.STRING), (state, o) -> state.originalBlock = o, state -> state.originalBlock, (state, parent) -> state.originalBlock = parent.originalBlock)
+      .add()
+      .appendInherited(
           new KeyedCodec<>("Template", SimpleItemContainer.CODEC),
           (state, o) -> state.template = o,
-          (state) -> state.template
+          (state) -> state.template, (state, parent) -> state.template = parent.template == null ? null : parent.template.clone()
       )
-      .addField(
+      .add()
+      .appendInherited(
           new KeyedCodec<>("PlayerContainers",
               new MapCodec<>(SimpleItemContainer.CODEC, ConcurrentHashMap::new)),
           (state, o) ->
@@ -95,12 +97,13 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
               temp.put(entry.getKey().toString(), entry.getValue());
             }
             return temp;
-          }
+          },
+          (state, parent) -> state.playerContainers = parent.playerContainers
       )
+      .add()
       .build();
 
   protected Map<UUID, SimpleItemContainer> playerContainers = new ConcurrentHashMap<>();
-  protected short capacity = -1;
   // This is serialized in case we want to de-convert at some point
   protected String originalBlock;
   protected SimpleItemContainer template;
@@ -111,13 +114,15 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     super(EMPTY);
   }
 
-  @SuppressWarnings({"unused", "CopyConstructorMissesField"})
   public ItemLootContainerBlock(ItemLootContainerBlock other) {
     super(other);
     this.originalBlock = other.originalBlock;
     this.template = other.template == null ? null : other.template.clone();
     this.uuid = other.uuid == null ? null : other.uuid;
     this.capacity = other.capacity;
+    for (Map.Entry<UUID, SimpleItemContainer> entry : other.playerContainers.entrySet()) {
+      this.playerContainers.put(entry.getKey(), entry.getValue().clone());
+    }
   }
 
   public ItemLootContainerBlock(ItemContainerBlock block) {
