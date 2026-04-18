@@ -214,10 +214,10 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     return new ItemLootContainerBlock(this);
   }
 
-  public void tick(CommandBuffer<ChunkStore> commandBuffer, BlockChunk blockChunk, BlockSection blockSection, Ref<ChunkStore> sectionRef, Ref<ChunkStore> blockRef, int x, int y, int z, boolean initialTick) {
+  public void tick(CommandBuffer<ChunkStore> commandBuffer, BlockChunk blockChunk, BlockSection blockSection, Ref<ChunkStore> sectionRef, Ref<ChunkStore> blockRef, int x, int y, int z, int wX, int wY, int wZ, boolean initialTick) {
     ComponentType<EntityStore, PlayerRef> componenttype = PlayerRef.getComponentType();
 
-    Vector3d vector3d = new Vector3d(Math.floor(x) + 0.5, Math.floor(y) + 0.5, Math.floor(z) + 0.5);
+    Vector3d vector3d = new Vector3d(wX + 0.5, wY + 0.5, wZ + 0.5);
     // TODO: Stuff
     /*
     if (uuid == null) {

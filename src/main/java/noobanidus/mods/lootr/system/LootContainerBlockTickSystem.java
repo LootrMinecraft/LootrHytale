@@ -56,7 +56,9 @@ public class LootContainerBlockTickSystem extends EntityTickingSystem<ChunkStore
 
     blockSection.forEachTicking(blockComponentChunk, commandBuffer, chunkSection.getY(),
         (blockCompChunk1, commandbuffer1, localX, localY, localZ, blockId) -> {
-          Ref<ChunkStore> ref2 = blockCompChunk1.getEntityReference(ChunkUtil.indexBlockInColumn(localX, localY, localZ));
+          int chunkIndex = ChunkUtil.indexBlockInColumn(localX, localY, localZ);
+
+          Ref<ChunkStore> ref2 = blockCompChunk1.getEntityReference(chunkIndex);
           if (ref2 == null) {
             return BlockTickStrategy.IGNORED;
           }
@@ -66,7 +68,11 @@ public class LootContainerBlockTickSystem extends EntityTickingSystem<ChunkStore
             return BlockTickStrategy.IGNORED;
           }
 
-          block.tick(commandbuffer1, blockChunk, blockSection, ref1, ref2, localX, localY, localZ, false);
+          int worldX = ChunkUtil.worldCoordFromLocalCoord(chunkSection.getX(), localX);
+          int worldY = ChunkUtil.worldCoordFromLocalCoord(chunkSection.getY(), localY);
+          int worldZ = ChunkUtil.worldCoordFromLocalCoord(chunkSection.getZ(), localZ);
+
+          block.tick(commandbuffer1, blockChunk, blockSection, ref1, ref2, localX, localY, localZ, worldX, worldY, worldZ, false);
           return BlockTickStrategy.CONTINUE;
         });
   }
