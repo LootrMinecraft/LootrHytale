@@ -56,13 +56,9 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     }
   }
 
-  // TODO: Who knows when the `addField` deprecation will break things???
-  @SuppressWarnings("deprecation")
   public static final BuilderCodec<ItemLootContainerBlock> CODEC = BuilderCodec.builder(
           ItemLootContainerBlock.class, ItemLootContainerBlock::new, ItemContainerBlock.CODEC
       )
-/*      .appendInherited(new KeyedCodec<>("Capacity", Codec.SHORT), (state, o) -> state.capacity = o, (state) -> state.capacity, (state, parent) -> state.capacity = parent.capacity)*/
-/*      .appendInherited(new KeyedCodec<>("Droplist", Codec.STRING), (state, o) -> state.droplist = o, state -> state.droplist, (state, parent) -> state.droplist = parent.droplist)*/
       .appendInherited(new KeyedCodec<>("OriginalBlock", Codec.STRING), (state, o) -> state.originalBlock = o, state -> state.originalBlock, (state, parent) -> state.originalBlock = parent.originalBlock)
       .add()
       .appendInherited(

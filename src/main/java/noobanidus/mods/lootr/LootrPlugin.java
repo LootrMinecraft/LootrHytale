@@ -21,10 +21,7 @@ import noobanidus.mods.lootr.component.UUIDComponent;
 import noobanidus.mods.lootr.config.LootrConfig;
 import noobanidus.mods.lootr.interaction.OpenLootContainerInteraction;
 import noobanidus.mods.lootr.block.ItemLootContainerBlock;
-import noobanidus.mods.lootr.system.BlockBreakEventSystem;
-import noobanidus.mods.lootr.system.BlockSpawnerPreSystem;
-import noobanidus.mods.lootr.system.LootContainerBlockAddedSystem;
-import noobanidus.mods.lootr.system.LootContainerBlockTickSystem;
+import noobanidus.mods.lootr.system.*;
 import noobanidus.mods.lootr.util.ReflectionHelper;
 import noobanidus.mods.lootr.util.TransformedBlockSpawnerEntry;
 
@@ -94,6 +91,7 @@ public class LootrPlugin extends JavaPlugin {
 
     this.getCommandRegistry().registerCommand(new LootrCommand());
 
+    registry.registerSystem(new LootrMigrationSystem());
     registry.registerSystem(new LootContainerBlockTickSystem(componenttype1, componenttype2, getLootContainerType()));
     registry.registerSystem(new LootContainerBlockAddedSystem(componenttype, getLootContainerType()));
     registry.registerSystem(new BlockSpawnerPreSystem());
