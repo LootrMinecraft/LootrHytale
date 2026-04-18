@@ -91,6 +91,7 @@ public class LootrPlugin extends JavaPlugin {
 
     this.getCommandRegistry().registerCommand(new LootrCommand());
 
+    //noinspection removal
     registry.registerSystem(new LootrMigrationSystem());
     registry.registerSystem(new LootContainerBlockTickSystem(componenttype1, componenttype2, getLootContainerType()));
     registry.registerSystem(new LootContainerBlockAddedSystem(componenttype, getLootContainerType()));

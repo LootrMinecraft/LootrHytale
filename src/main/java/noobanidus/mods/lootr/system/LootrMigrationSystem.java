@@ -15,6 +15,7 @@ import noobanidus.mods.lootr.block.ItemLootContainerBlock;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+@Deprecated(forRemoval = true)
 public class LootrMigrationSystem extends BlockModule.MigrationSystem {
   @Override
   public void onEntityAdd(@Nonnull Holder<ChunkStore> holder, @Nonnull AddReason reason, @Nonnull Store<ChunkStore> store) {
