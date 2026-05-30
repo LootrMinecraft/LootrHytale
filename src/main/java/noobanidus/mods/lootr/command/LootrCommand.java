@@ -61,11 +61,15 @@ public class LootrCommand extends AbstractCommandCollection {
       var template = itemcontainerblock.getItemContainer().clone();
       // This clears the original chest
       itemcontainerblock.getItemContainer().clear();
+      var blocktype = BlockType.getAssetMap().getIndex(LootrPlugin.LOOT_CHEST_ID);
       var rotation = chunk.getRotationIndex(x, y, z);
-      chunk.setBlock(x, y, z, BlockType.getAssetMap().getIndex(LootrPlugin.LOOT_CHEST_ID), LootrPlugin.get()
+      var holder = LootrPlugin.get().getLootrChestBlockType().getBlockEntity();
+      chunk.setBlock(x, y, z, blocktype, LootrPlugin.get()
           .getLootrChestBlockType(), rotation, 0, 0);
 
-      var newBlock = store.getStore().getComponent(entityRef, ItemLootContainerBlock.getLootComponentType());
+      var newBlock = holder.getComponent(LootrPlugin.get().getLootContainerType());
+
+      //var newBlock = store.getStore().getComponent(entityRef, ItemLootContainerBlock.getLootComponentType());
       if (newBlock == null) {
         commandsender.sendMessage(
             Message.translation("commands.lootr.custom.failure_to_replace").param("x", x).param("y", y).param("z", z)
@@ -76,6 +80,7 @@ public class LootrCommand extends AbstractCommandCollection {
       newBlock.setOriginalBlock(type.getId());
       newBlock.setTemplate(template);
       newBlock.setCapacity((short) Math.max(18, template.getCapacity()));
+      chunk.setState(x, y, z, LootrPlugin.get().getLootrChestBlockType(), rotation, holder);
       commandsender.sendMessage(
           Message.translation("commands.lootr.custom.success").param("x", x).param("y", y).param("z", z)
       );

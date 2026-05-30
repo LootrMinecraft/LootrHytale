@@ -5,8 +5,6 @@ import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.util.ChunkUtil;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.protocol.packets.interface_.Page;
 import com.hypixel.hytale.server.core.Message;
@@ -18,6 +16,7 @@ import com.hypixel.hytale.server.core.entity.entities.player.windows.ContainerBl
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.client.SimpleBlockInteraction;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.BlockComponentChunk;
@@ -25,6 +24,8 @@ import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import noobanidus.mods.lootr.block.ItemLootContainerBlock;
+import org.joml.Vector3d;
+import org.joml.Vector3i;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -40,6 +41,7 @@ public class OpenLootContainerInteraction extends SimpleBlockInteraction {
       .documentation("Opens the instanced container keyed to the player currently interacting with the block.")
       .build();
 
+  @SuppressWarnings("removal")
   @Override
   protected void interactWithBlock(
       @Nonnull World world,
@@ -56,6 +58,7 @@ public class OpenLootContainerInteraction extends SimpleBlockInteraction {
     if (player == null) {
       return;
     }
+    PlayerRef playerRef = commandBuffer.getComponent(ref, PlayerRef.getComponentType());
     ChunkStore chunkstore = world.getChunkStore();
     Ref<ChunkStore> ref1 = chunkstore.getChunkReference(ChunkUtil.indexChunkFromBlock(pos.x, pos.z));
     if (ref1 == null) {
@@ -73,7 +76,7 @@ public class OpenLootContainerInteraction extends SimpleBlockInteraction {
     ItemLootContainerBlock itemcontainerblock = chunkstore.getStore()
         .getComponent(ref2, ItemLootContainerBlock.getLootComponentType());
     if (itemcontainerblock == null) {
-      player.sendMessage(
+      playerRef.sendMessage(
           Message.translation("server.interactions.invalidBlockState")
               .param("interaction", this.getClass().getSimpleName())
               .param("blockState", chunkstore.getStore().getArchetype(ref2).toString())
@@ -87,7 +90,7 @@ public class OpenLootContainerInteraction extends SimpleBlockInteraction {
       UUID uuid = uuidcomponent.getUuid();
       WorldChunk worldchunk = world.getChunk(ChunkUtil.indexChunkFromBlock(pos.x, pos.z));
       ContainerBlockWindow containerblockwindow = new ContainerBlockWindow(
-          pos.x, pos.y, pos.z, worldchunk.getRotationIndex(pos.x, pos.y, pos.z), blocktype, itemcontainerblock.getItemContainer(ref2, chunkstore.getStore(), player, uuid)
+          pos.x, pos.y, pos.z, worldchunk.getRotationIndex(pos.x, pos.y, pos.z), blocktype, itemcontainerblock.getItemContainer(ref2, chunkstore.getStore(), player, playerRef, uuid)
       );
       Map<UUID, ContainerBlockWindow> map = itemcontainerblock.getWindows();
       if (map.putIfAbsent(uuid, containerblockwindow) == null) {
@@ -106,7 +109,7 @@ public class OpenLootContainerInteraction extends SimpleBlockInteraction {
                 int l = worldchunk.getRotationIndex(pos.x, pos.y, pos.z);
                 Vector3d vector3d1 = new Vector3d();
                 blocktype.getBlockCenter(l, vector3d1);
-                vector3d1.add(pos);
+                vector3d1.add(pos.x, pos.y, pos.z);
                 SoundUtil.playSoundEvent3d(ref, k, vector3d1, commandBuffer);
               }
             }
@@ -128,7 +131,7 @@ public class OpenLootContainerInteraction extends SimpleBlockInteraction {
           int j = worldchunk.getRotationIndex(pos.x, pos.y, pos.z);
           Vector3d vector3d = new Vector3d();
           blocktype.getBlockCenter(j, vector3d);
-          vector3d.add(pos);
+          vector3d.add(pos.x, pos.y, pos.z);
           SoundUtil.playSoundEvent3d(ref, i, vector3d, commandBuffer);
         } else {
           map.remove(uuid, containerblockwindow);

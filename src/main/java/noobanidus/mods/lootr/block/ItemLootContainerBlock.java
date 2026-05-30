@@ -12,7 +12,6 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.spatial.SpatialResource;
 import com.hypixel.hytale.event.EventPriority;
-import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
@@ -30,6 +29,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import noobanidus.mods.lootr.LootrPlugin;
 import noobanidus.mods.lootr.container.EmptySimpleItemContainer;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.joml.Vector3d;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -167,11 +167,11 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     return EmptySimpleItemContainer.INSTANCE;
   }
 
-  public SimpleItemContainer getItemContainer(Ref<ChunkStore> ref, Store<ChunkStore> store, Player playerComponent, UUID player) {
+  public SimpleItemContainer getItemContainer(Ref<ChunkStore> ref, Store<ChunkStore> store, Player playerComponent, PlayerRef playerRef, UUID player) {
     SimpleItemContainer newContainer = new SimpleItemContainer(this.capacity);
     if ("".equals(droplist) || droplist == null || droplist.isEmpty()) {
       if (template == null || template == EmptySimpleItemContainer.INSTANCE) {
-        playerComponent.sendMessage(
+        playerRef.sendMessage(
             Message.translation("general.Noobanidus_Lootr.NoDropList").bold(true).color(Color.red)
         );
         return EmptySimpleItemContainer.INSTANCE;

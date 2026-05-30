@@ -7,12 +7,12 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.math.util.ChunkUtil;
-import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.protocol.GameMode;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
 import com.hypixel.hytale.server.core.event.events.ecs.BreakBlockEvent;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.BlockComponentChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
@@ -22,6 +22,7 @@ import noobanidus.mods.lootr.LootrPlugin;
 import noobanidus.mods.lootr.block.ItemLootContainerBlock;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.joml.Vector3i;
 
 import java.awt.*;
 
@@ -69,21 +70,25 @@ public class BlockBreakEventSystem extends EntityEventSystem<EntityStore, BreakB
     var movement = commandBuffer.getComponent(ref, MovementStatesComponent.getComponentType());
     assert player != null;
     assert movement != null;
+
+    PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
+    assert playerRef != null;
+
     if (!movement.getMovementStates().crouching) {
       // TODO: Messages send multiple times which is annoying
       if (player.getGameMode() == GameMode.Creative) {
         // Not crouching in creative mode
-        player.sendMessage(
+        playerRef.sendMessage(
             Message.translation("general.Noobanidus_Lootr.CrouchToBreakCreative").bold(true).color(Color.red)
         );
         event.setCancelled(true);
       } else {
         if (LootrPlugin.get().getConfig().isBreakDisabled()) {
-          player.sendMessage(
+          playerRef.sendMessage(
               Message.translation("general.Noobanidus_Lootr.CannotBreak").bold(true).color(Color.red)
           );
         } else {
-          player.sendMessage(
+          playerRef.sendMessage(
               Message.translation("general.Noobanidus_Lootr.CrouchToBreak").bold(true).color(Color.red)
           );
         }
@@ -92,7 +97,7 @@ public class BlockBreakEventSystem extends EntityEventSystem<EntityStore, BreakB
     } else {
       if (player.getGameMode() != GameMode.Creative) {
         if (LootrPlugin.get().getConfig().isBreakDisabled()) {
-          player.sendMessage(
+          playerRef.sendMessage(
               Message.translation("general.Noobanidus_Lootr.CannotBreak").bold(true).color(Color.red)
           );
           event.setCancelled(true);
