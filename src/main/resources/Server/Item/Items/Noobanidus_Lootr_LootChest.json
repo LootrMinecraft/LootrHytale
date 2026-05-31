@@ -46,7 +46,7 @@
     },
     "BlockEntity": {
       "Components": {
-        "ItemLootContainerBlock": {
+        "Noobanidus_Lootr_LootChest": {
           "Capacity": 1
         }
       }

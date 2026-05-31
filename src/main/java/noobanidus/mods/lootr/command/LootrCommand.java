@@ -1,18 +1,22 @@
 package noobanidus.mods.lootr.command;
 
+import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.protocol.GameMode;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
 import com.hypixel.hytale.server.core.modules.block.components.ItemContainerBlock;
+import com.hypixel.hytale.server.core.universe.world.chunk.BlockComponentChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.commands.block.SimpleBlockCommand;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import noobanidus.mods.lootr.LootrPlugin;
-import noobanidus.mods.lootr.block.ItemLootContainerBlock;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 public class LootrCommand extends AbstractCommandCollection {
@@ -36,53 +40,77 @@ public class LootrCommand extends AbstractCommandCollection {
       if (type == null || type.getId().equals(LootrPlugin.LOOT_CHEST_ID)) {
         return;
       }
-      Ref<ChunkStore> entityRef = chunk.getBlockComponentEntity(x, y, z);
-      if (entityRef == null) {
+
+      Store<ChunkStore> store = chunk.getWorld().getChunkStore().getStore();
+      BlockComponentChunk blockComponentChunk = store.getComponent(chunk.getReference(), BlockComponentChunk.getComponentType());
+      if (blockComponentChunk == null) {
         commandsender.sendMessage(
-            Message.translation("commands.lootr.custom.failure_invalid_state").param("x", x).param("y", y).param("z", z)
-                .param("type", type.getId())
+            Message.translation("commands.lootr.custom.failure_invalid_state")
+                .param("x", x).param("y", y).param("z", z).param("type", type.getId())
         );
-        return; // ???
+        return;
       }
 
-      // TODO: Is this correct?
-      var store = chunk.getWorld().getChunkStore();
+      int slotIndex = ChunkUtil.indexBlockInColumn(x, y, z);
+      ItemContainerBlock itemcontainerblock = null;
+      Ref<ChunkStore> blockEntityRef = blockComponentChunk.getEntityReference(slotIndex);
+      if (blockEntityRef != null) {
+        itemcontainerblock = blockEntityRef.getStore()
+            .getComponent(blockEntityRef, ItemContainerBlock.getComponentType());
+      } else {
+        Holder<ChunkStore> existingHolder = blockComponentChunk.getEntityHolder(slotIndex);
+        if (existingHolder != null) {
+          itemcontainerblock = existingHolder.getComponent(ItemContainerBlock.getComponentType());
+        }
+      }
 
-      ItemContainerBlock itemcontainerblock = store.getStore()
-          .getComponent(entityRef, ItemContainerBlock.getComponentType());
       if (itemcontainerblock == null) {
         commandsender.sendMessage(
-            Message.translation("commands.lootr.custom.failure_invalid_state").param("x", x).param("y", y).param("z", z)
-                .param("type", type.getId())
+            Message.translation("commands.lootr.custom.failure_invalid_state")
+                .param("x", x).param("y", y).param("z", z).param("type", type.getId())
         );
-        return; // TODO: I had some message for this
+        return;
       }
-      // This creates the template
+
       var template = itemcontainerblock.getItemContainer().clone();
-      // This clears the original chest
       itemcontainerblock.getItemContainer().clear();
-      var blocktype = BlockType.getAssetMap().getIndex(LootrPlugin.LOOT_CHEST_ID);
-      var rotation = chunk.getRotationIndex(x, y, z);
-      var holder = LootrPlugin.get().getLootrChestBlockType().getBlockEntity();
-      chunk.setBlock(x, y, z, blocktype, LootrPlugin.get()
-          .getLootrChestBlockType(), rotation, 0, 0);
 
-      var newBlock = holder.getComponent(LootrPlugin.get().getLootContainerType());
+      RotationTuple rotation = chunk.getRotation(x, y, z);
+      boolean placed = chunk.placeBlock(x, y, z, LootrPlugin.LOOT_CHEST_ID, rotation, 0, false);
+      if (!placed) {
+        commandsender.sendMessage(
+            Message.translation("commands.lootr.custom.failure_to_replace")
+                .param("x", x).param("y", y).param("z", z)
+        );
+        return;
+      }
 
-      //var newBlock = store.getStore().getComponent(entityRef, ItemLootContainerBlock.getLootComponentType());
+      Ref<ChunkStore> newEntityRef = chunk.getBlockComponentEntity(x, y, z);
+      if (newEntityRef == null) {
+        commandsender.sendMessage(
+            Message.translation("commands.lootr.custom.failure_to_replace")
+                .param("x", x).param("y", y).param("z", z)
+        );
+        return;
+      }
+
+      var newBlock = store.getComponent(newEntityRef, LootrPlugin.get().getLootContainerType());
       if (newBlock == null) {
         commandsender.sendMessage(
-            Message.translation("commands.lootr.custom.failure_to_replace").param("x", x).param("y", y).param("z", z)
+            Message.translation("commands.lootr.custom.failure_to_replace")
+                .param("x", x).param("y", y).param("z", z)
         );
-        return; // TODO: Something something message here
+        return;
       }
+
       newBlock.setDroplist(null);
       newBlock.setOriginalBlock(type.getId());
       newBlock.setTemplate(template);
       newBlock.setCapacity((short) Math.max(18, template.getCapacity()));
-      chunk.setState(x, y, z, LootrPlugin.get().getLootrChestBlockType(), rotation, holder);
+
       commandsender.sendMessage(
-          Message.translation("commands.lootr.custom.success").param("x", x).param("y", y).param("z", z)
+          Message.translation("commands.lootr.custom.success")
+              .param("x", x).param("y", y).param("z", z)
       );
     }
   }
