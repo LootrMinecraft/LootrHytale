@@ -6,7 +6,6 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
-import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.protocol.GameMode;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -15,7 +14,6 @@ import com.hypixel.hytale.server.core.event.events.ecs.BreakBlockEvent;
 import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import noobanidus.mods.lootr.LootrPlugin;
@@ -39,25 +37,19 @@ public class BlockBreakEventSystem extends EntityEventSystem<EntityStore, BreakB
 
     Vector3i pos = event.getTargetBlock();
     World world = commandBuffer.getExternalData().getWorld();
-    long i = ChunkUtil.indexChunkFromBlock(pos.x, pos.z);
-    WorldChunk worldchunk = world.getChunkIfLoaded(i);
-    if (worldchunk == null) {
-      return;
-    }
 
-    ChunkStore chunkstore = world.getChunkStore();
-    Ref<ChunkStore> ref1 = chunkstore.getChunkReference(i);
+    ChunkStore chunkStore = world.getChunkStore();
+    Ref<ChunkStore> ref1 = chunkStore.getChunkSectionReferenceAtBlock(pos.x, pos.y, pos.z);
     if (ref1 == null || !ref1.isValid()) {
       return;
     }
 
-    Store<ChunkStore> store1 = chunkstore.getStore();
+    Store<ChunkStore> store1 = chunkStore.getStore();
     Ref<ChunkStore> ref2 = BlockModule.getBlockEntity(store1, ref1, pos.x, pos.y, pos.z);
     if (ref2 == null) {
       return;
     }
-    ItemLootContainerBlock itemcontainerblock = chunkstore.getStore()
-        .getComponent(ref2, ItemLootContainerBlock.getLootComponentType());
+    ItemLootContainerBlock itemcontainerblock = store1.getComponent(ref2, ItemLootContainerBlock.getLootComponentType());
     if (itemcontainerblock == null) {
       return;
     }
