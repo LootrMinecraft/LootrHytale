@@ -1,7 +1,7 @@
 {
     "Group": "Lootr",
     "Name": "Lootr",
-    "Version": "0.2.11",
+    "Version": "0.4.13",
     "Description": "Server-friendly loot for everyone!",
     "Authors": [
         {
@@ -10,7 +10,7 @@
             "Url": "https://noobanidus.com"
         }
     ],
-    "ServerVersion": ">=0.5.0",
+    "ServerVersion": ">=0.6.1",
     "Website": "https://noobanidus.com",
     "Dependencies": {
         "Hytale:LegacyModule": "*",

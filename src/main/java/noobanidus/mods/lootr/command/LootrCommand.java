@@ -1,17 +1,11 @@
 package noobanidus.mods.lootr.command;
 
-import com.hypixel.hytale.component.Holder;
-import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.math.util.ChunkUtil;
-import com.hypixel.hytale.protocol.GameMode;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
-import com.hypixel.hytale.server.core.asset.type.blocktype.config.RotationTuple;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
-import com.hypixel.hytale.server.core.modules.block.components.ItemContainerBlock;
 import com.hypixel.hytale.server.core.universe.world.chunk.BlockComponentChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.commands.block.SimpleBlockCommand;
@@ -22,7 +16,7 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 public class LootrCommand extends AbstractCommandCollection {
   public LootrCommand() {
     super("lootr", "commands.lootr.description");
-    this.setPermissionGroup(GameMode.Creative);
+    this.setPermissionGroups("hyale:WorldEditor");
     this.addSubCommand(new LootrCustomCommand());
   }
 
@@ -51,7 +45,7 @@ public class LootrCommand extends AbstractCommandCollection {
         return;
       }
 
-      int slotIndex = ChunkUtil.indexBlockInColumn(x, y, z);
+/*      int slotIndex = ChunkUtil.indexBlockInColumn(x, y, z);
       ItemContainerBlock itemcontainerblock = null;
       Ref<ChunkStore> blockEntityRef = blockComponentChunk.getEntityReference(slotIndex);
       if (blockEntityRef != null) {
@@ -111,7 +105,7 @@ public class LootrCommand extends AbstractCommandCollection {
       commandsender.sendMessage(
           Message.translation("commands.lootr.custom.success")
               .param("x", x).param("y", y).param("z", z)
-      );
+      );*/
     }
   }
 }

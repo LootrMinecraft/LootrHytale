@@ -5,11 +5,8 @@ import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.map.MapCodec;
-import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.*;
 import com.hypixel.hytale.component.Component;
-import com.hypixel.hytale.component.ComponentType;
-import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.spatial.SpatialResource;
 import com.hypixel.hytale.event.EventPriority;
 import com.hypixel.hytale.server.core.Message;
@@ -22,8 +19,6 @@ import com.hypixel.hytale.server.core.modules.entity.EntityModule;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.ParticleUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.BlockChunk;
-import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import noobanidus.mods.lootr.LootrPlugin;
@@ -210,35 +205,10 @@ public class ItemLootContainerBlock extends ItemContainerBlock {
     return new ItemLootContainerBlock(this);
   }
 
-  public void tick(CommandBuffer<ChunkStore> commandBuffer, BlockChunk blockChunk, BlockSection blockSection, Ref<ChunkStore> sectionRef, Ref<ChunkStore> blockRef, int x, int y, int z, int wX, int wY, int wZ, boolean initialTick) {
+  public void tick(CommandBuffer<ChunkStore> commandBuffer, int wX, int wY, int wZ) {
     ComponentType<EntityStore, PlayerRef> componenttype = PlayerRef.getComponentType();
 
     Vector3d vector3d = new Vector3d(wX + 0.5, wY + 0.5, wZ + 0.5);
-    // TODO: Stuff
-    /*
-    if (uuid == null) {
-      uuid = UUID.randomUUID();
-      commandBuffer.run((chunkStore) -> {
-        var worldchunk = this.getChunk();
-        var blockEntity = worldchunk.getBlockComponentEntity(this.getBlockX(), this.getBlockY(), this.getBlockZ());
-        if (blockEntity == null) {
-          blockEntity = BlockModule.ensureBlockEntity(worldchunk, this.getBlockX(), this.getBlockY(), this.getBlockZ());
-        }
-
-        if (blockEntity != null) {
-          var currentUuid = chunkStore.getComponent(blockEntity, UUIDComponent.getComponentType());
-          if (currentUuid == null) {
-            chunkStore.putComponent(blockEntity, UUIDComponent.getComponentType(), new UUIDComponent(uuid));
-          } else {
-            uuid = currentUuid.getUuid();
-          }
-        } else {
-          // Log that we couldn't store the uuid
-          LootrPlugin.LOGGER.at(Level.WARNING)
-              .log("Could not store UUID for Lootr chest at %s.", this.getCenteredBlockPosition());
-        }
-      });
-    } */
 
     var entityStore = commandBuffer.getExternalData().getWorld().getEntityStore().getStore();
     var spatialresource = entityStore

@@ -5,8 +5,9 @@ import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.server.core.asset.type.blocktick.BlockTickStrategy;
-import com.hypixel.hytale.server.core.universe.world.chunk.BlockChunk;
-import com.hypixel.hytale.server.core.universe.world.chunk.BlockComponentChunk;
+import com.hypixel.hytale.server.core.modules.block.BlockModule;
+import com.hypixel.hytale.server.core.universe.world.TickSuppressionRegistry;
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockComponentSection;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
 import com.hypixel.hytale.server.core.universe.world.chunk.section.ChunkSection;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
@@ -45,34 +46,42 @@ public class LootContainerBlockTickSystem extends EntityTickingSystem<ChunkStore
       return;
     }
 
-    BlockComponentChunk blockComponentChunk = commandBuffer.getComponent(ref, BlockComponentChunk.getComponentType());
-
-    assert blockComponentChunk != null;
+    BlockComponentSection blockcomponentsection = archetype.getComponent(index, BlockComponentSection.getComponentType());
+    assert blockcomponentsection != null;
 
     Ref<ChunkStore> ref1 = archetype.getReferenceTo(index);
-    BlockChunk blockChunk = commandBuffer.getComponent(ref, BlockChunk.getComponentType());
+    TickSuppressionRegistry tickSuppressionRegistry = store.getExternalData().getWorld().getEntityStore().getStore()
+        .getResource(TickSuppressionRegistry.RESOURCE);
+    TickSuppressionRegistry tickSuppressionRegistry1 = tickSuppressionRegistry != null && tickSuppressionRegistry.hasKind(1) ? tickSuppressionRegistry : null;
 
-    assert blockChunk != null;
+    int i = chunkSection.getX();
+    int j = chunkSection.getZ();
+    int k = chunkSection.getY();
 
-    blockSection.forEachTicking(blockComponentChunk, commandBuffer, chunkSection.getY(),
-        (blockCompChunk1, commandbuffer1, localX, localY, localZ, blockId) -> {
-          int chunkIndex = ChunkUtil.indexBlockInColumn(localX, localY, localZ);
-
-          Ref<ChunkStore> ref2 = blockCompChunk1.getEntityReference(chunkIndex);
+    blockSection.forEachTicking(blockcomponentsection, commandBuffer, chunkSection.getY(),
+        (blockComponentSection1, commandbuffer1, localX, localY, localZ, blockId) -> {
+          Ref<ChunkStore> ref2 = blockComponentSection1.getBlockReference(ChunkUtil.indexBlock(localX, localY, localZ));
           if (ref2 == null) {
             return BlockTickStrategy.IGNORED;
           }
+
+          BlockModule.BlockStateInfo blockmodule$blockstateinfo = commandbuffer1.getComponent(ref2, BlockModule.BlockStateInfo.getComponentType());
 
           ItemLootContainerBlock block = commandbuffer1.getComponent(ref2, this.lootContainerComponentType);
           if (block == null) {
             return BlockTickStrategy.IGNORED;
           }
 
-          int worldX = ChunkUtil.worldCoordFromLocalCoord(chunkSection.getX(), localX);
-          int worldY = ChunkUtil.worldCoordFromLocalCoord(chunkSection.getY(), localY);
-          int worldZ = ChunkUtil.worldCoordFromLocalCoord(chunkSection.getZ(), localZ);
+          int worldX = ChunkUtil.worldCoordFromLocalCoord(i, localX);
+          int worldY = ChunkUtil.worldCoordFromLocalCoord(k, localY);
+          int worldZ = ChunkUtil.worldCoordFromLocalCoord(j, localZ);
 
-          block.tick(commandbuffer1, blockChunk, blockSection, ref1, ref2, localX, localY, localZ, worldX, worldY, worldZ, false);
+
+          if (tickSuppressionRegistry1 != null && tickSuppressionRegistry1.isBlockSuppressed(worldX, worldY, worldZ, 1)) {
+            return BlockTickStrategy.IGNORED;
+          }
+
+          block.tick(commandbuffer1, worldX, worldY, worldZ);
           return BlockTickStrategy.CONTINUE;
         });
   }

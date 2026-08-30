@@ -12,9 +12,9 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
 import com.hypixel.hytale.server.core.event.events.ecs.BreakBlockEvent;
+import com.hypixel.hytale.server.core.modules.block.BlockModule;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.chunk.BlockComponentChunk;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -47,15 +47,12 @@ public class BlockBreakEventSystem extends EntityEventSystem<EntityStore, BreakB
 
     ChunkStore chunkstore = world.getChunkStore();
     Ref<ChunkStore> ref1 = chunkstore.getChunkReference(i);
-    if (ref1 == null) {
+    if (ref1 == null || !ref1.isValid()) {
       return;
     }
-    BlockComponentChunk blockComponentChunk = chunkstore.getStore()
-        .getComponent(ref1, BlockComponentChunk.getComponentType());
-    if (blockComponentChunk == null) {
-      return;
-    }
-    Ref<ChunkStore> ref2 = blockComponentChunk.getEntityReference(ChunkUtil.indexBlockInColumn(pos.x, pos.y, pos.z));
+
+    Store<ChunkStore> store1 = chunkstore.getStore();
+    Ref<ChunkStore> ref2 = BlockModule.getBlockEntity(store1, ref1, pos.x, pos.y, pos.z);
     if (ref2 == null) {
       return;
     }

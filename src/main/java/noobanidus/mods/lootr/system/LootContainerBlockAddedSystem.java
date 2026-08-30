@@ -36,29 +36,27 @@ public class LootContainerBlockAddedSystem extends RefSystem<ChunkStore> {
     BlockModule.BlockStateInfo blockStateInfo = commandBuffer.getComponent(ref, this.blockStateInfoComponentType);
     assert blockStateInfo != null;
 
-    Ref<ChunkStore> refx = blockStateInfo.getChunkRef();
+    Ref<ChunkStore> refx = blockStateInfo.getSectionRef();
     if (!refx.isValid()) {
       return;
     }
 
+    BlockSection blockSection = commandBuffer.getComponent(refx, BlockSection.getComponentType());
+    assert blockSection != null;
+
     int index = blockStateInfo.getIndex();
-    int j = ChunkUtil.xFromBlockInColumn(index);
-    int k = ChunkUtil.yFromBlockInColumn(index);
-    int l = ChunkUtil.zFromBlockInColumn(index);
+    int j = ChunkUtil.xFromIndex(index);
+    int k = ChunkUtil.yFromIndex(index);
+    int l = ChunkUtil.zFromIndex(index);
 
-    BlockChunk chunk = commandBuffer.getComponent(refx, BlockChunk.getComponentType());
-
-    assert chunk != null;
-
-    // Y?
-    BlockSection section = chunk.getSectionAtBlockY(k);
+    // commandBuffer, blockStateInfo, blockSection, refx, ref, block, j, k, l, true
 
     World world = commandBuffer.getExternalData().getWorld();
     Store<EntityStore> worldStore = world.getEntityStore().getStore();
     WorldTimeResource resource = worldStore.getResource(WorldTimeResource.getResourceType());
     Instant instance = resource.getGameTime();
 
-    section.scheduleTick(ChunkUtil.indexBlock(j, k, l), instance.plusMillis(600));
+    blockSection.scheduleTick(ChunkUtil.indexBlock(j, k, l), instance.plusMillis(600));
   }
 
   @Override
