@@ -10,7 +10,7 @@
             "Url": "https://noobanidus.com"
         }
     ],
-    "ServerVersion": ">=0.6.1",
+    "ServerVersion": ">=0.6.2",
     "Website": "https://noobanidus.com",
     "Dependencies": {
         "Hytale:LegacyModule": "*",
